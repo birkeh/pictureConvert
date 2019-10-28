@@ -189,6 +189,8 @@ void cMainWindow::addFile(const QString& file)
 	items[0]->setData(QVariant::fromValue(lpExif), Qt::UserRole+1);
 
 	m_lpFileListModel->appendRow(items);
+
+	qApp->processEvents();
 }
 
 bool cMainWindow::isInList(const QString& file)

@@ -84,6 +84,9 @@ bool cImage::loadRAW(const QString &fileName)
 	if(rawProcessor.open_file(fileName.toUtf8()) != LIBRAW_SUCCESS)
 		return(false);
 
+	rawProcessor.imgdata.params.use_camera_wb	= 0;
+	rawProcessor.imgdata.params.use_auto_wb		= 0;
+
 	if(rawProcessor.unpack() != LIBRAW_SUCCESS)
 		return(false);
 

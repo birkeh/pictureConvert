@@ -8,7 +8,7 @@ cExportDialog::cExportDialog(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	connect(ui->m_lpQualityValue,	&QSlider::valueChanged,	this,	&cExportDialog::onQualityChanged);
+	connect(ui->m_lpQuality,	&QSlider::valueChanged,	this,	&cExportDialog::onQualityChanged);
 }
 
 cExportDialog::~cExportDialog()
