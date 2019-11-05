@@ -44,7 +44,6 @@ DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    cdcp.cpp \
     cexif.cpp \
     cexportdialog.cpp \
     cimage.cpp \
@@ -54,7 +53,6 @@ SOURCES += \
     cmainwindow.cpp
 
 HEADERS += \
-    cdcp.h \
     cexif.h \
     cexportdialog.h \
     cimage.h \
