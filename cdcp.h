@@ -2,6 +2,8 @@
 #define CDCP_H
 
 
+#include "dng_camera_profile.h"
+
 #include <QObject>
 #include <QMetaObject>
 #include <QList>
