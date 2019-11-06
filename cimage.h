@@ -8,6 +8,7 @@
 
 
 #include "libraw/libraw.h"
+#include <opencv2/opencv.hpp>
 
 #include <QImage>
 
@@ -37,6 +38,51 @@ protected:
 		camera_end
 	};
 
+	template <typename num>
+	num clip(float val) const
+	{
+		int vr = qRound(val);
+
+		// trust me I'm an engineer @ -2
+		// with -2 we do not get pink in oversaturated areas
+		if (vr > std::numeric_limits<num>::max())
+			vr = std::numeric_limits<num>::max()-2;
+		if (vr < 0)
+			vr = 0;
+
+		return static_cast<num>(vr);
+	}
+
+	template <typename num>
+	num clip(double val) const
+	{
+		int vr = qRound(val);
+
+		// trust me I'm an engineer @ -2
+		// with -2 we do not get pink in oversaturated areas
+		if (vr > std::numeric_limits<num>::max())
+			vr = std::numeric_limits<num>::max()-2;
+		if (vr < 0)
+			vr = 0;
+
+		return static_cast<num>(vr);
+	}
+
+	template <typename num>
+	num clip(int val) const
+	{
+		int vr = qRound(static_cast<double>(val));
+
+		// trust me I'm an engineer @ -2
+		// with -2 we do not get pink in oversaturated areas
+		if (vr > std::numeric_limits<num>::max())
+			vr = std::numeric_limits<num>::max()-2;
+		if (vr < 0)
+			vr = 0;
+
+		return static_cast<num>(vr);
+	}
+
 private:
 	bool	m_isChromatic;
 	Cam		m_camType;
@@ -45,6 +91,16 @@ private:
 
 	bool	openBuffer(const QString &fileName, const QSharedPointer<QByteArray>& ba, LibRaw& iProcessor);
 	void	detectSpecialCamera(const LibRaw & iProcessor);
+
+	cv::Mat	demosaic(LibRaw & iProcessor);
+	cv::Mat	prepareImg(const LibRaw & iProcessor);
+	void	whiteBalance(const LibRaw & iProcessor, cv::Mat & img);
+	cv::Mat	whiteMultipliers(const LibRaw & iProcessor);
+	void	gammaCorrection(const LibRaw & iProcessor, cv::Mat& img);
+	cv::Mat	gammaTable(const LibRaw & iProcessor);
+
+	QImage	raw2Img(const LibRaw & iProcessor, cv::Mat & img);
+	QImage	mat2QImage(cv::Mat img);
 };
 
 #endif // CIMAGE_H
