@@ -15,6 +15,16 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class cMainWindow; }
 QT_END_NAMESPACE
 
+
+typedef struct tagIMAGEFORMAT
+{
+	QString	shortName;
+	QString	extension;
+	bool	read;
+	bool	write;
+} IMAGEFORMAT;
+
+
 class cMainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -29,6 +39,7 @@ private:
 	QStandardItemModel*				m_lpFileListModel;
 
 	QMimeDatabase					m_mimeDB;
+	QList<IMAGEFORMAT>				m_imageFormats;
 
 
 	void							initUI();
@@ -48,9 +59,11 @@ private slots:
 	void							onClearList();
 	void							onConvert();
 
+	void							onThumbnailSize(int size);
 	void							onAddEntry(const QString& file);
 
 protected:
 	void							closeEvent(QCloseEvent* event);
+	void							addImageFormat(const char* shortName, const char* extension);
 };
 #endif // CMAINWINDOW_H

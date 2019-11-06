@@ -12,6 +12,7 @@
 #include <QFileInfo>
 
 #include <QDebug>
+#include <QElapsedTimer>
 
 
 cImage::cImage() :
@@ -97,7 +98,6 @@ bool cImage::load(const QString &fileName, const char *format)
 
 	return(loadRAW(fileName));
 }
-
 
 bool cImage::openBuffer(const QString &fileName, const QSharedPointer<QByteArray>& ba, LibRaw& iProcessor)
 {
@@ -378,6 +378,7 @@ bool cImage::loadRAW(const QString &fileName)
 	detectSpecialCamera(iProcessor);
 
 	int	error = iProcessor.unpack();
+
 	if(strcmp(iProcessor.version(), "0.13.5") != 0)	// fixes a bug specific to libraw 13 - version call is UNTESTED
 		iProcessor.raw2image();
 
