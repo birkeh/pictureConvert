@@ -77,6 +77,7 @@ RESOURCES += \
 DISTFILES += \
     README.md \
     LICENSE \
+    fileFormats.xlsx \
     qdarkstyle/rc/branch_closed-on.png \
     qdarkstyle/rc/branch_closed.png \
     qdarkstyle/rc/branch_open-on.png \

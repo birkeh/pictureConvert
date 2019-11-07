@@ -16,28 +16,11 @@
 #include <QList>
 #include <QStandardItem>
 
+#include <QFileDialog>
+
 #include <QImageReader>
 #include <QImageWriter>
 
-
-void cMainWindow::addImageFormat(const char* shortName, const char* extension)
-{
-	QList<QByteArray>	readList	= QImageReader::supportedImageFormats();
-	QList<QByteArray>	writeList	= QImageWriter::supportedImageFormats();
-
-	bool	r	= readList.contains(QByteArray(shortName));
-	bool	w	= writeList.contains(QByteArray(shortName));
-
-	if(QString(shortName).isEmpty())
-		r	= true;
-
-	IMAGEFORMAT	i;
-	i.shortName	= shortName;
-	i.extension = extension;
-	i.read		= r;
-	i.write		= w;
-	m_imageFormats.append(i);
-}
 
 cMainWindow::cMainWindow(cSplashScreen* lpSplashScreen, QWidget *parent) :
 	QMainWindow(parent),
@@ -47,53 +30,8 @@ cMainWindow::cMainWindow(cSplashScreen* lpSplashScreen, QWidget *parent) :
 	initUI();
 	createActions();
 
+	setImageFormats();
 	onClearList();
-
-	addImageFormat("bmp", "Windows Bitmap (*.bmp)");
-	addImageFormat("gif", "Graphic Interchange Format (optional) (*.gif)");
-	addImageFormat("jpg", "Joint Photographic Experts Group (*.jpg)");
-	addImageFormat("png", "Portable Network Graphics (*.png)");
-	addImageFormat("pbm", "Portable Bitmap (*.pbm)");
-	addImageFormat("pgm", "Portable Graymap (*.pgm)");
-	addImageFormat("ppm", "Portable Pixmap (*.ppm)");
-	addImageFormat("xbm", "X11 Bitmap (*.xbm)");
-	addImageFormat("xpm", "X11 Pixmap (*.xpm)");
-	addImageFormat("svg", "Scalable Vector Graphics (*.svg)");
-	addImageFormat("icns", "Apple Icon Image (*.icns)");
-	addImageFormat("jp2", "Joint Photographic Experts Group 2000 (*.jp2)");
-	addImageFormat("mng", "Multiple-image Network Graphics (*.mng)");
-	addImageFormat("tga", "Truevision Graphics Adapter (*.tga)");
-	addImageFormat("tiff", "Tagged Image File Format (*.tiff)");
-	addImageFormat("wbmp", "Wireless Bitmap (*.wbmp)");
-	addImageFormat("webp", "WebP (*.webp)");
-	addImageFormat("", "Hasselblad (*.3fr)");
-	addImageFormat("", "Arri_Alexa (*.ari)");
-	addImageFormat("", "Sony (*.arw *.srf *.sr2)");
-	addImageFormat("", "Casio (*.bay)");
-	addImageFormat("", "Blackmagic Design (*.braw)");
-	addImageFormat("", "Cintel (*.cri)");
-	addImageFormat("", "Canon (*.crw *.cr2 *.cr3)");
-	addImageFormat("", "Phase_One (*.cap *.iiq *.eip)");
-	addImageFormat("", "Kodak (*.dcs *.dcr *.drf *.k25 *.kdc)");
-	addImageFormat("", "Adobe (*.dng)");
-	addImageFormat("", "Epson (*.erf)");
-	addImageFormat("", "Imacon/Hasselblad raw (*.fff)");
-	addImageFormat("", "GoPro (*.gpr)");
-	addImageFormat("", "Mamiya (*.mef)");
-	addImageFormat("", "Minolta, Agfa (*.mdc)");
-	addImageFormat("", "Leaf (*.mos)");
-	addImageFormat("", "Minolta, Konica Minolta (*.mrw)");
-	addImageFormat("", "Nikon (*.nef *.nrw)");
-	addImageFormat("", "Olympus (*.orf)");
-	addImageFormat("", "Pentax (*.pef *.ptx)");
-	addImageFormat("", "Logitech (*.pxn)");
-	addImageFormat("", "RED Digital Cinema (*.R3D)");
-	addImageFormat("", "Fuji (*.raf)");
-	addImageFormat("", "Panasonic (*.raw *.rw2)");
-	addImageFormat("", "Leica (*.raw *.rwl *.dng)");
-	addImageFormat("", "Rawzor (*.rwz)");
-	addImageFormat("", "Samsung (*.srw)");
-	addImageFormat("", "Sigma (*.x3f)");
 }
 
 cMainWindow::~cMainWindow()
@@ -173,12 +111,159 @@ void cMainWindow::createFileActions()
 {
 }
 
+void cMainWindow::setImageFormats()
+{
+	QList<QByteArray>	readList	= QImageReader::supportedImageFormats();
+	QList<QByteArray>	writeList	= QImageWriter::supportedImageFormats();
+
+	addImageFormat("bmp", "Windows Bitmap", "*.bmp", readList, writeList);
+	addImageFormat("gif", "Graphic Interchange Format (optional)", "*.gif", readList, writeList);
+	addImageFormat("jpg", "Joint Photographic Experts Group", "*.jpg", readList, writeList);
+	addImageFormat("png", "Portable Network Graphics", "*.png", readList, writeList);
+	addImageFormat("pbm", "Portable Bitmap", "*.pbm", readList, writeList);
+	addImageFormat("pgm", "Portable Graymap", "*.pgm", readList, writeList);
+	addImageFormat("ppm", "Portable Pixmap", "*.ppm", readList, writeList);
+	addImageFormat("xbm", "X11 Bitmap", "*.xbm", readList, writeList);
+	addImageFormat("xpm", "X11 Pixmap", "*.xpm", readList, writeList);
+	addImageFormat("svg", "Scalable Vector Graphics", "*.svg", readList, writeList);
+	addImageFormat("icns", "Apple Icon Image", "*.icns", readList, writeList);
+	addImageFormat("jp2", "Joint Photographic Experts Group 2000", "*.jp2", readList, writeList);
+	addImageFormat("mng", "Multiple-image Network Graphics", "*.mng", readList, writeList);
+	addImageFormat("tga", "Truevision Graphics Adapter", "*.tga", readList, writeList);
+	addImageFormat("tiff", "Tagged Image File Format", "*.tiff", readList, writeList);
+	addImageFormat("wbmp", "Wireless Bitmap", "*.wbmp", readList, writeList);
+	addImageFormat("webp", "WebP", "*.webp", readList, writeList);
+	addImageFormat("", "Hasselblad", "*.3fr", readList, writeList);
+	addImageFormat("", "Arri_Alexa", "*.ari", readList, writeList);
+	addImageFormat("", "Sony", "*.arw *.srf *.sr2", readList, writeList);
+	addImageFormat("", "Casio", "*.bay", readList, writeList);
+	addImageFormat("", "Blackmagic Design", "*.braw", readList, writeList);
+	addImageFormat("", "Cintel", "*.cri", readList, writeList);
+	addImageFormat("", "Canon", "*.crw *.cr2 *.cr3", readList, writeList);
+	addImageFormat("", "Phase_One", "*.cap *.iiq *.eip", readList, writeList);
+	addImageFormat("", "Kodak", "*.dcs *.dcr *.drf *.k25 *.kdc", readList, writeList);
+	addImageFormat("", "Adobe", "*.dng", readList, writeList);
+	addImageFormat("", "Epson", "*.erf", readList, writeList);
+	addImageFormat("", "Imacon/Hasselblad raw", "*.fff", readList, writeList);
+	addImageFormat("", "GoPro", "*.gpr", readList, writeList);
+	addImageFormat("", "Mamiya", "*.mef", readList, writeList);
+	addImageFormat("", "Minolta, Agfa", "*.mdc", readList, writeList);
+	addImageFormat("", "Leaf", "*.mos", readList, writeList);
+	addImageFormat("", "Minolta, Konica Minolta", "*.mrw", readList, writeList);
+	addImageFormat("", "Nikon", "*.nef *.nrw", readList, writeList);
+	addImageFormat("", "Olympus", "*.orf", readList, writeList);
+	addImageFormat("", "Pentax", "*.pef *.ptx", readList, writeList);
+	addImageFormat("", "Logitech", "*.pxn", readList, writeList);
+	addImageFormat("", "RED Digital Cinema", "*.R3D", readList, writeList);
+	addImageFormat("", "Fuji", "*.raf", readList, writeList);
+	addImageFormat("", "Panasonic", "*.raw *.rw2", readList, writeList);
+	addImageFormat("", "Leica", "*.raw *.rwl *.dng", readList, writeList);
+	addImageFormat("", "Rawzor", "*.rwz", readList, writeList);
+	addImageFormat("", "Samsung", "*.srw", readList, writeList);
+	addImageFormat("", "Sigma", "*.x3f", readList, writeList);
+}
+
+void cMainWindow::addImageFormat(const char* shortName, const char* description, const char* extension, QList<QByteArray>& readList, QList<QByteArray>& writeList)
+{
+	bool	r	= readList.contains(QByteArray(shortName));
+	bool	w	= writeList.contains(QByteArray(shortName));
+
+	if(QString(shortName).isEmpty())
+		r	= true;
+
+	IMAGEFORMAT	i;
+	i.shortName		= shortName;
+	i.description	= description;
+	i.extension		= extension;
+	i.read			= r;
+	i.write			= w;
+	m_imageFormats.append(i);
+}
+
+QString cMainWindow::generateReadList()
+{
+	QString	all("all supported files (");
+	QString	readList;
+
+	for(int z = 0;z < m_imageFormats.count();z++)
+	{
+		IMAGEFORMAT	i	= m_imageFormats[z];
+
+		if(i.read)
+		{
+			all.append(i.extension);
+			all.append(" ");
+
+			readList.append(";;");
+			readList.append(i.description);
+			readList.append(" (");
+			readList.append(i.shortName);
+			readList.append(")");
+		}
+	}
+
+	readList.prepend(all);
+	return(readList);
+}
+
+QString cMainWindow::generateWriteList()
+{
+	QString	all("all supported files (");
+	QString	writeList;
+
+	for(int z = 0;z < m_imageFormats.count();z++)
+	{
+		IMAGEFORMAT	i	= m_imageFormats[z];
+
+		if(i.write)
+		{
+			all.append(i.extension);
+			all.append(" ");
+
+			writeList.append(";;");
+			writeList.append(i.description);
+			writeList.append(" (");
+			writeList.append(i.shortName);
+			writeList.append(")");
+		}
+	}
+
+	writeList.prepend(all);
+	return(writeList);
+}
+
 void cMainWindow::onAddFile()
 {
+	QSettings	settings;
+	QString		path		= settings.value("import/oldPath", QVariant::fromValue(QDir::homePath())).toString();
+
+	QStringList	fileList	= QFileDialog::getOpenFileNames(this, "Import from", path, generateReadList());
+
+	if(fileList.isEmpty())
+		return;
+
+	QFileInfo	info(fileList[0]);
+
+	path	= info.path();
+	settings.setValue("import/oldPath", QVariant::fromValue(path));
+
+	for(int i = 0;i < fileList.count();i++)
+		onAddEntry(fileList[i]);
 }
 
 void cMainWindow::onAddFolder()
 {
+	QSettings	settings;
+	QString		path		= settings.value("import/oldPath", QVariant::fromValue(QDir::homePath())).toString();
+
+	path	= QFileDialog::getExistingDirectory(this, "Import from", path);
+
+	if(path.isEmpty())
+		return;
+
+	settings.setValue("import/oldPath", QVariant::fromValue(path));
+
+	onAddEntry(path);
 }
 
 void cMainWindow::onRemoveSelected()

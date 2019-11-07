@@ -19,6 +19,7 @@ QT_END_NAMESPACE
 typedef struct tagIMAGEFORMAT
 {
 	QString	shortName;
+	QString	description;
 	QString	extension;
 	bool	read;
 	bool	write;
@@ -64,6 +65,11 @@ private slots:
 
 protected:
 	void							closeEvent(QCloseEvent* event);
-	void							addImageFormat(const char* shortName, const char* extension);
+
+	void							setImageFormats();
+	void							addImageFormat(const char* shortName, const char* description, const char* extension, QList<QByteArray>& readList, QList<QByteArray>& writeList);
+
+	QString							generateReadList();
+	QString							generateWriteList();
 };
 #endif // CMAINWINDOW_H
