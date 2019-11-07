@@ -2,10 +2,9 @@
 #include "ui_cmainwindow.h"
 
 #include "cimage.h"
-
 #include "cexif.h"
-
 #include "cexportdialog.h"
+#include "cfiledialog.h"
 
 #include <QSettings>
 
@@ -197,7 +196,7 @@ QString cMainWindow::generateReadList()
 			readList.append(";;");
 			readList.append(i.description);
 			readList.append(" (");
-			readList.append(i.shortName);
+			readList.append(i.extension);
 			readList.append(")");
 		}
 	}
@@ -223,7 +222,7 @@ QString cMainWindow::generateWriteList()
 			writeList.append(";;");
 			writeList.append(i.description);
 			writeList.append(" (");
-			writeList.append(i.shortName);
+			writeList.append(i.extension);
 			writeList.append(")");
 		}
 	}
@@ -237,7 +236,18 @@ void cMainWindow::onAddFile()
 	QSettings	settings;
 	QString		path		= settings.value("import/oldPath", QVariant::fromValue(QDir::homePath())).toString();
 
-	QStringList	fileList	= QFileDialog::getOpenFileNames(this, "Import from", path, generateReadList());
+	cFileDialog	fileDialog(this);
+
+	fileDialog.setWindowTitle("Import from");
+	fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+	fileDialog.setDirectory(path);
+	fileDialog.setFileMode(QFileDialog::ExistingFiles);
+	fileDialog.setViewMode(QFileDialog::Detail);
+	fileDialog.setNameFilter(generateReadList());
+	if(!fileDialog.exec())
+		return;
+
+	QStringList	fileList	= fileDialog.selectedFiles();
 
 	if(fileList.isEmpty())
 		return;
@@ -255,15 +265,35 @@ void cMainWindow::onAddFolder()
 {
 	QSettings	settings;
 	QString		path		= settings.value("import/oldPath", QVariant::fromValue(QDir::homePath())).toString();
+	bool		checked		= settings.value("import/recursive", QVariant::fromValue(false)).toBool();
 
-	path	= QFileDialog::getExistingDirectory(this, "Import from", path);
+	cFileDialog	fileDialog(this);
+
+	fileDialog.setWindowTitle("Import from");
+	fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+	fileDialog.setDirectory(path);
+	fileDialog.setFileMode(QFileDialog::DirectoryOnly);
+	fileDialog.setViewMode(QFileDialog::Detail);
+	fileDialog.addCheckbox();
+	fileDialog.setChecked(checked);
+
+	if(!fileDialog.exec())
+		return;
+
+	path	= fileDialog.selectedFiles()[0];
 
 	if(path.isEmpty())
 		return;
 
-	settings.setValue("import/oldPath", QVariant::fromValue(path));
+	checked	= fileDialog.checked();
 
-	onAddEntry(path);
+	settings.setValue("import/oldPath", QVariant::fromValue(path));
+	settings.setValue("import/recursive", QVariant::fromValue(checked));
+
+	addPath(path, checked);
+
+	for(int i = 0;i < m_lpFileListModel->columnCount();i++)
+		ui->m_lpFileList->resizeColumnToContents(i);
 }
 
 void cMainWindow::onRemoveSelected()
@@ -296,14 +326,17 @@ void cMainWindow::onAddEntry(const QString& file)
 		ui->m_lpFileList->resizeColumnToContents(i);
 }
 
-void cMainWindow::addPath(const QString& path)
+void cMainWindow::addPath(const QString& path, bool recursive)
 {
 	QDir		dir(path);
 	QStringList	dirList		= dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
 	QStringList	fileList	= dir.entryList(QDir::Files);
 
-	for(int i = 0;i < dirList.count();i++)
-		addPath(path + "/" + dirList[i]);
+	if(recursive)
+	{
+		for(int i = 0;i < dirList.count();i++)
+			addPath(path + "/" + dirList[i], recursive);
+	}
 
 	for(int i = 0;i < fileList.count();i++)
 		addFile(path + "/" + fileList[i]);

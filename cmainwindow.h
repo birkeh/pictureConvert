@@ -48,7 +48,7 @@ private:
 	void							createFileActions();
 	void							createContextActions();
 
-	void							addPath(const QString& path);
+	void							addPath(const QString& path, bool recursive = true);
 	void							addFile(const QString& file);
 
 	bool							isInList(const QString& file);

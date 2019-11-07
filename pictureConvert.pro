@@ -46,6 +46,7 @@ DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 SOURCES += \
     cexif.cpp \
     cexportdialog.cpp \
+    cfiledialog.cpp \
     cimage.cpp \
     csplashscreen.cpp \
     ctreeview.cpp \
@@ -55,6 +56,7 @@ SOURCES += \
 HEADERS += \
     cexif.h \
     cexportdialog.h \
+    cfiledialog.h \
     cimage.h \
     csplashscreen.h \
     cmainwindow.h \
