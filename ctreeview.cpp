@@ -31,7 +31,9 @@ void cTreeView::dropEvent(QDropEvent* event)
 		QList<QUrl>	urlList	= mimeData->urls();
 
 		for(int i = 0; i < urlList.size(); i++)
-			emit addEntry(urlList[i].toLocalFile());
+			pathList.append(urlList[i].toLocalFile());
+
+		emit addEntrys(pathList);
 	}
 
 	event->acceptProposedAction();

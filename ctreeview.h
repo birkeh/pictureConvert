@@ -26,7 +26,7 @@ protected:
 private:
 
 signals:
-	void				addEntry(const QString& path);
+	void				addEntrys(const QStringList& fileList);
 };
 
 Q_DECLARE_METATYPE(cTreeView*)

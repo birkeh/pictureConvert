@@ -42,6 +42,7 @@ private:
 	QMimeDatabase					m_mimeDB;
 	QList<IMAGEFORMAT>				m_imageFormats;
 
+	bool							m_working;
 
 	void							initUI();
 	void							createActions();
@@ -61,7 +62,7 @@ private slots:
 	void							onConvert();
 
 	void							onThumbnailSize(int size);
-	void							onAddEntry(const QString& file);
+	void							onAddEntrys(const QStringList& fileList);
 
 protected:
 	void							closeEvent(QCloseEvent* event);

@@ -20,11 +20,14 @@
 #include <QImageReader>
 #include <QImageWriter>
 
+#include <QMessageBox>
+
 
 cMainWindow::cMainWindow(cSplashScreen* lpSplashScreen, QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::cMainWindow),
-	m_lpSplashScreen(lpSplashScreen)
+	m_lpSplashScreen(lpSplashScreen),
+	m_working(false)
 {
 	initUI();
 	createActions();
@@ -40,6 +43,13 @@ cMainWindow::~cMainWindow()
 
 void cMainWindow::closeEvent(QCloseEvent *event)
 {
+	if(m_working)
+	{
+		QMessageBox::information(this, tr("Close"), tr("Can't close, pictureConvert is working."));
+		event->ignore();
+		return;
+	}
+
 	QSettings	settings;
 	settings.setValue("main/width", QVariant::fromValue(size().width()));
 	settings.setValue("main/height", QVariant::fromValue(size().height()));
@@ -97,7 +107,7 @@ void cMainWindow::createActions()
 
 	connect(ui->m_lpConvert,		&QPushButton::clicked,	this,		&cMainWindow::onConvert);
 
-	connect(ui->m_lpFileList,		&cTreeView::addEntry,	this,		&cMainWindow::onAddEntry);
+	connect(ui->m_lpFileList,		&cTreeView::addEntrys,	this,		&cMainWindow::onAddEntrys);
 
 	connect(ui->m_lpThumbnailSize,	&QSlider::valueChanged,	this,		&cMainWindow::onThumbnailSize);
 }
@@ -257,8 +267,7 @@ void cMainWindow::onAddFile()
 	path	= info.path();
 	settings.setValue("import/oldPath", QVariant::fromValue(path));
 
-	for(int i = 0;i < fileList.count();i++)
-		onAddEntry(fileList[i]);
+	onAddEntrys(fileList);
 }
 
 void cMainWindow::onAddFolder()
@@ -290,10 +299,14 @@ void cMainWindow::onAddFolder()
 	settings.setValue("import/oldPath", QVariant::fromValue(path));
 	settings.setValue("import/recursive", QVariant::fromValue(checked));
 
+	m_working	= true;
+
 	addPath(path, checked);
 
 	for(int i = 0;i < m_lpFileListModel->columnCount();i++)
 		ui->m_lpFileList->resizeColumnToContents(i);
+
+	m_working	= false;
 }
 
 void cMainWindow::onRemoveSelected()
@@ -308,22 +321,31 @@ void cMainWindow::onClearList()
 	m_lpFileListModel->setHorizontalHeaderLabels(headerLabels);
 }
 
-void cMainWindow::onAddEntry(const QString& file)
+void cMainWindow::onAddEntrys(const QStringList& fileList)
 {
-	QFileInfo	fileInfo(file);
+	m_working	= true;
 
-	if(fileInfo.isDir())
-		addPath(file);
-	else
+	for(int i = 0;i < fileList.count();i++)
 	{
-		QMimeType	mimeType	= m_mimeDB.mimeTypeForFile(file);
+		QString	file	= fileList[i];
 
-		if(mimeType.name().startsWith("image"))
-			addFile(file);
+		QFileInfo	fileInfo(file);
+
+		if(fileInfo.isDir())
+			addPath(file);
+		else
+		{
+			QMimeType	mimeType	= m_mimeDB.mimeTypeForFile(file);
+
+			if(mimeType.name().startsWith("image"))
+				addFile(file);
+		}
 	}
 
 	for(int i = 0;i < m_lpFileListModel->columnCount();i++)
 		ui->m_lpFileList->resizeColumnToContents(i);
+
+	m_working	= false;
 }
 
 void cMainWindow::addPath(const QString& path, bool recursive)
