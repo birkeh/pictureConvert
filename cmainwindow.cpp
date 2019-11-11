@@ -2,7 +2,6 @@
 #include "ui_cmainwindow.h"
 
 #include "cimage.h"
-#include "cexif.h"
 #include "cexportdialog.h"
 #include "cfiledialog.h"
 
@@ -27,6 +26,7 @@ cMainWindow::cMainWindow(cSplashScreen* lpSplashScreen, QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::cMainWindow),
 	m_lpSplashScreen(lpSplashScreen),
+	m_lpProgressBar(nullptr),
 	m_working(false)
 {
 	initUI();
@@ -91,6 +91,10 @@ void cMainWindow::initUI()
 		if(iX != -1 && iY != -1)
 			move(iX, iY);
 	}
+
+	m_lpProgressBar			= new QProgressBar(this);
+	m_lpProgressBar->setVisible(false);
+	ui->m_lpStatusBar->addPermanentWidget(m_lpProgressBar);
 }
 
 void cMainWindow::createActions()
@@ -189,58 +193,6 @@ void cMainWindow::addImageFormat(const char* shortName, const char* description,
 	m_imageFormats.append(i);
 }
 
-QString cMainWindow::generateReadList()
-{
-	QString	all("all supported files (");
-	QString	readList;
-
-	for(int z = 0;z < m_imageFormats.count();z++)
-	{
-		IMAGEFORMAT	i	= m_imageFormats[z];
-
-		if(i.read)
-		{
-			all.append(i.extension);
-			all.append(" ");
-
-			readList.append(";;");
-			readList.append(i.description);
-			readList.append(" (");
-			readList.append(i.extension);
-			readList.append(")");
-		}
-	}
-
-	readList.prepend(all);
-	return(readList);
-}
-
-QString cMainWindow::generateWriteList()
-{
-	QString	all("all supported files (");
-	QString	writeList;
-
-	for(int z = 0;z < m_imageFormats.count();z++)
-	{
-		IMAGEFORMAT	i	= m_imageFormats[z];
-
-		if(i.write)
-		{
-			all.append(i.extension);
-			all.append(" ");
-
-			writeList.append(";;");
-			writeList.append(i.description);
-			writeList.append(" (");
-			writeList.append(i.extension);
-			writeList.append(")");
-		}
-	}
-
-	writeList.prepend(all);
-	return(writeList);
-}
-
 void cMainWindow::onAddFile()
 {
 	QSettings	settings;
@@ -253,7 +205,7 @@ void cMainWindow::onAddFile()
 	fileDialog.setDirectory(path);
 	fileDialog.setFileMode(QFileDialog::ExistingFiles);
 	fileDialog.setViewMode(QFileDialog::Detail);
-	fileDialog.setNameFilter(generateReadList());
+	fileDialog.setNameFilter(generateReadList(m_imageFormats));
 	if(!fileDialog.exec())
 		return;
 
@@ -300,12 +252,15 @@ void cMainWindow::onAddFolder()
 	settings.setValue("import/recursive", QVariant::fromValue(checked));
 
 	m_working	= true;
+	ui->m_lpStatusBar->showMessage(tr("importing..."));
+	qApp->processEvents();
 
 	addPath(path, checked);
 
 	for(int i = 0;i < m_lpFileListModel->columnCount();i++)
 		ui->m_lpFileList->resizeColumnToContents(i);
 
+	ui->m_lpStatusBar->showMessage(tr("done."), 3000);
 	m_working	= false;
 }
 
@@ -324,6 +279,8 @@ void cMainWindow::onClearList()
 void cMainWindow::onAddEntrys(const QStringList& fileList)
 {
 	m_working	= true;
+	ui->m_lpStatusBar->showMessage(tr("importing..."));
+	qApp->processEvents();
 
 	for(int i = 0;i < fileList.count();i++)
 	{
@@ -345,11 +302,15 @@ void cMainWindow::onAddEntrys(const QStringList& fileList)
 	for(int i = 0;i < m_lpFileListModel->columnCount();i++)
 		ui->m_lpFileList->resizeColumnToContents(i);
 
+	ui->m_lpStatusBar->showMessage(tr("done."), 3000);
 	m_working	= false;
 }
 
 void cMainWindow::addPath(const QString& path, bool recursive)
 {
+	ui->m_lpStatusBar->showMessage(QString(tr("importing %1...")).arg(path));
+	qApp->processEvents();
+
 	QDir		dir(path);
 	QStringList	dirList		= dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
 	QStringList	fileList	= dir.entryList(QDir::Files);
@@ -366,6 +327,9 @@ void cMainWindow::addPath(const QString& path, bool recursive)
 
 void cMainWindow::addFile(const QString& file)
 {
+	ui->m_lpStatusBar->showMessage(QString(tr("importing %1...")).arg(file));
+	qApp->processEvents();
+
 	if(isInList(file))
 		return;
 
@@ -415,9 +379,29 @@ bool cMainWindow::isInList(const QString& file)
 
 void cMainWindow::onConvert()
 {
-	cExportDialog*	lpExportDialog	= new cExportDialog(this);
-	lpExportDialog->exec();
-	delete lpExportDialog;
+	cExportDialog	exportDialog(m_imageFormats, this);
+	if(exportDialog.exec() == QDialog::Rejected)
+		return;
+
+	doExport();
+}
+
+void cMainWindow::onThumbnailSize(int size)
+{
+	ui->m_lpThumbnailSizeValue->setText(QString::number(size));
+	ui->m_lpFileList->setIconSize(QSize(size, size));
+}
+
+void cMainWindow::doExport()
+{
+	EXPORTSETTINGS	exportSettings;
+	bool			overwriteAll	= false;
+
+	getExportSettings(exportSettings);
+
+	m_lpProgressBar->setRange(0, m_lpFileListModel->rowCount());
+	m_lpProgressBar->setValue(0);
+	m_lpProgressBar->setVisible(true);
 
 	for(int i = 0;i < m_lpFileListModel->rowCount();i++)
 	{
@@ -429,20 +413,198 @@ void cMainWindow::onConvert()
 		if(!lpExif)
 			continue;
 
-		cImage			image(lpExif->fileName());
-		if(image.isNull())
-			continue;
+		overwriteAll	= exportFile(exportSettings, lpExif, overwriteAll);
 
-		QString			newFile	= lpExif->fileName();
-		newFile		= newFile.left(newFile.lastIndexOf("."));
-		newFile.append("_converted.jpg");
-
-		image.save(newFile);
+		m_lpProgressBar->setValue(i);
+		qApp->processEvents();
 	}
+
+	m_lpProgressBar->setVisible(false);
+	ui->m_lpStatusBar->showMessage(tr("export done."), 3000);
 }
 
-void cMainWindow::onThumbnailSize(int size)
+void cMainWindow::getExportSettings(EXPORTSETTINGS& exportSettings)
 {
-	ui->m_lpThumbnailSizeValue->setText(QString::number(size));
-	ui->m_lpFileList->setIconSize(QSize(size, size));
+	QSettings	settings;
+	QString		tmp;
+
+	tmp		= settings.value("export/directoryMethod", QVariant::fromValue(QString("keepDirectory"))).toString();
+
+	if(tmp == "newDirectoryTag")
+		exportSettings.directoryMethod	= DIRECTORY_METHOD_TAG;
+	else if(tmp == "newDirectory")
+		exportSettings.directoryMethod	= DIRECTORY_METHOD_NEW;
+	else
+		exportSettings.directoryMethod	= DIRECTORY_METHOD_KEEP;
+
+	exportSettings.directory			= settings.value("export/destinationPath", QVariant::fromValue(QString(""))).toString();
+	exportSettings.keepStructure		= settings.value("export/keepStructure", QVariant::fromValue(false)).toBool();
+	exportSettings.directoryTag			= settings.value("export/destinationPathTag", QVariant::fromValue(QString(""))).toString();
+
+
+	tmp		= settings.value("export/fileMethod", QVariant::fromValue(QString("keepFilename"))).toString();
+
+	if(tmp == "newFilename")
+		exportSettings.fileMethod		= FILE_METHOD_RENAME;
+	else
+		exportSettings.fileMethod		= FILE_METHOD_KEEP;
+
+
+	tmp		= settings.value("export/filenamePlus", QVariant::fromValue(QString("converted"))).toString();
+
+	if(tmp == "TAG")
+		exportSettings.fileAdd			= FILE_ADD_TAG;
+	else
+		exportSettings.fileAdd			= FILE_ADD_CONVERTED;
+
+	exportSettings.fileTag				= settings.value("export/fileTag", QVariant::fromValue(QString(""))).toString();
+
+	tmp		= settings.value("export/overwrite", QVariant::fromValue(QString("ask"))).toString();
+
+	if(tmp == "overwrite")
+		exportSettings.fileOverwrite	= FILE_OVERWRITE_OVERWRITE;
+	else if(tmp == "rename")
+		exportSettings.fileOverwrite	= FILE_OVERWRITE_RENAME;
+	else
+		exportSettings.fileOverwrite	= FILE_OVERWRITE_ASK;
+
+	exportSettings.fileFormat			= settings.value("export/fileFormat").toString();
+	exportSettings.quality				= settings.value("export/quality", QVariant::fromValue(50)).toInt();
+}
+
+bool cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* lpExif, bool overwriteAll)
+{
+	QString		destPath;
+	QString		destFile;
+	QFileInfo	fileInfo(lpExif->fileName());
+	QString		extension	= exportSettings.fileFormat;
+
+	extension	= extension.mid(extension.lastIndexOf(".")+1);
+	extension	= extension.left(extension.length()-1);
+
+	switch(exportSettings.directoryMethod)
+	{
+	case DIRECTORY_METHOD_NEW:
+		destPath	= exportSettings.directory;
+		if(exportSettings.keepStructure)
+			destPath.append("/" + fileInfo.absolutePath().replace(":", ""));
+		break;
+	case DIRECTORY_METHOD_KEEP:
+		destPath	= fileInfo.absolutePath();
+		break;
+	case DIRECTORY_METHOD_TAG:
+		destPath	= replaceTags(exportSettings.directoryTag, lpExif, extension);
+		break;
+	}
+
+	switch(exportSettings.fileMethod)
+	{
+	case FILE_METHOD_KEEP:
+		destFile	= fileInfo.baseName() + "." + extension;
+		break;
+	case FILE_METHOD_RENAME:
+		switch(exportSettings.fileAdd)
+		{
+		case FILE_ADD_CONVERTED:
+			destFile	= fileInfo.baseName() + "_converted" + "." + extension;
+			break;
+		case FILE_ADD_TAG:
+			destFile	= replaceTags(fileInfo.baseName(), lpExif, extension, false) + "." + extension;
+			break;
+		}
+		break;
+	}
+
+	destFile.prepend(destPath + "/");
+	QFileInfo	destInfo(destFile);
+
+	if(destInfo.exists() && !overwriteAll)
+	{
+		switch(exportSettings.fileOverwrite)
+		{
+		case FILE_OVERWRITE_ASK:
+			{
+				QMessageBox::StandardButton	ret	= QMessageBox::question(this, tr("File Exists"), QString(tr("File %1 exists. Do you want to overwrite?")).arg(destFile), QMessageBox::Yes | QMessageBox::No | QMessageBox::YesAll);
+				if(ret == QMessageBox::YesAll)
+					overwriteAll	= true;
+				else if(ret == QMessageBox::No)
+					return(overwriteAll);
+			}
+			break;
+		case FILE_OVERWRITE_RENAME:
+			destFile	= findFreeFileName(destFile);
+			if(destFile.isEmpty())
+			{
+				QMessageBox::information(this, tr("File Export"), QString("%1 cannot be renamed.").arg(lpExif->fileName()));
+				return(overwriteAll);
+			}
+			break;
+		case FILE_OVERWRITE_OVERWRITE:
+			break;
+		}
+	}
+
+	ui->m_lpStatusBar->showMessage(QString(tr("loading %1...")).arg(lpExif->fileName()));
+	qApp->processEvents();
+
+	cImage			image(lpExif->fileName());
+	if(!image.isNull())
+	{
+		QFileInfo	info(destFile);
+
+		if(info.exists())
+			qDebug() << "MACHMA NED!!!";
+		else
+		{
+			ui->m_lpStatusBar->showMessage(QString(tr("converting to %1...")).arg(destFile));
+			qApp->processEvents();
+
+			QDir		dir;
+			QFileInfo	info(destFile);
+
+			if(dir.mkpath(info.absolutePath()))
+				image.save(destFile);
+		}
+	}
+
+	return(overwriteAll);
+}
+
+QString cMainWindow::replaceTags(const QString& path, cEXIF* lpExif, const QString& extension, bool directory)
+{
+	QString		dest	= path;
+	QFileInfo	fileInfo(lpExif->fileName());
+
+	if(directory)
+		dest	= dest.replace("%o", fileInfo.absolutePath());
+	else
+		dest	= dest.replace("%o", fileInfo.fileName());
+
+	dest		= dest.replace("%y", lpExif->dateTime().toString("yyyy"));
+	dest		= dest.replace("%m", lpExif->dateTime().toString("MM"));
+	dest		= dest.replace("%d", lpExif->dateTime().toString("dd"));
+	dest		= dest.replace("%H", lpExif->dateTime().toString("hh"));
+	dest		= dest.replace("%M", lpExif->dateTime().toString("mm"));
+	dest		= dest.replace("%S", lpExif->dateTime().toString("ss"));
+	dest		= dest.replace("%t", extension);
+
+	dest		= dest.replace("\\", "/");
+
+	return(dest);
+}
+
+QString cMainWindow::findFreeFileName(const QString& fileName)
+{
+	QFileInfo	fileInfo(fileName);
+	QString		newName;
+	int			number	= 1;
+
+	for(;;)
+	{
+		newName	= fileInfo.absolutePath() + "/" + fileInfo.baseName() + QString::number(number) + "." + fileInfo.suffix();
+
+		if(!QFileInfo::exists(newName))
+			return(newName);
+	}
+//	return("");
 }

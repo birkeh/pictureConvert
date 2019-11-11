@@ -18,4 +18,18 @@
 #endif
 
 
+typedef struct tagIMAGEFORMAT
+{
+	QString	shortName;
+	QString	description;
+	QString	extension;
+	bool	read;
+	bool	write;
+} IMAGEFORMAT;
+
+
+QString	generateReadList(const QList<IMAGEFORMAT>& imageFormats);
+QString	generateWriteList(const QList<IMAGEFORMAT>& imageFormats);
+
+
 #endif // COMMON_H

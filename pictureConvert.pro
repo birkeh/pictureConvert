@@ -48,6 +48,7 @@ SOURCES += \
     cexportdialog.cpp \
     cfiledialog.cpp \
     cimage.cpp \
+    common.cpp \
     csplashscreen.cpp \
     ctreeview.cpp \
     main.cpp \
