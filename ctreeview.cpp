@@ -48,3 +48,11 @@ void cTreeView::dragLeaveEvent(QDragLeaveEvent *event)
 {
 	event->accept();
 }
+
+void cTreeView::keyPressEvent(QKeyEvent *event)
+{
+	if(event->key() == Qt::Key_Delete)
+		emit deleteEntrys();
+	else
+		QTreeView::keyPressEvent(event);
+}

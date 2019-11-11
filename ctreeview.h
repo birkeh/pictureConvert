@@ -23,10 +23,12 @@ protected:
 	void				dragMoveEvent(QDragMoveEvent *event) override;
 	void				dragLeaveEvent(QDragLeaveEvent *event) override;
 
+	void				keyPressEvent(QKeyEvent *event) override;
 private:
 
 signals:
 	void				addEntrys(const QStringList& fileList);
+	void				deleteEntrys();
 };
 
 Q_DECLARE_METATYPE(cTreeView*)

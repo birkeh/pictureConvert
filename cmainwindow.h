@@ -107,7 +107,9 @@ private slots:
 	void							onConvert();
 
 	void							onThumbnailSize(int size);
+
 	void							onAddEntrys(const QStringList& fileList);
+	void							onDeleteEntrys();
 
 protected:
 	void							closeEvent(QCloseEvent* event);

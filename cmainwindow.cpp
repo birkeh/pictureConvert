@@ -33,7 +33,6 @@ cMainWindow::cMainWindow(cSplashScreen* lpSplashScreen, QWidget *parent) :
 	createActions();
 
 	setImageFormats();
-	onClearList();
 }
 
 cMainWindow::~cMainWindow()
@@ -95,6 +94,9 @@ void cMainWindow::initUI()
 	m_lpProgressBar			= new QProgressBar(this);
 	m_lpProgressBar->setVisible(false);
 	ui->m_lpStatusBar->addPermanentWidget(m_lpProgressBar);
+
+	QStringList			headerLabels	= QStringList() << tr("path") << tr("file") << tr("size") << tr("date") << tr("width") << tr("height") << ("");
+	m_lpFileListModel->setHorizontalHeaderLabels(headerLabels);
 }
 
 void cMainWindow::createActions()
@@ -104,16 +106,17 @@ void cMainWindow::createActions()
 	createFileActions();
 	createContextActions();
 
-	connect(ui->m_lpAddFile,		&QPushButton::clicked,	this,		&cMainWindow::onAddFile);
-	connect(ui->m_lpAddFolder,		&QPushButton::clicked,	this,		&cMainWindow::onAddFolder);
-	connect(ui->m_lpRemoveSelected,	&QPushButton::clicked,	this,		&cMainWindow::onRemoveSelected);
-	connect(ui->m_lpClearList,		&QPushButton::clicked,	this,		&cMainWindow::onClearList);
+	connect(ui->m_lpAddFile,		&QPushButton::clicked,		this,		&cMainWindow::onAddFile);
+	connect(ui->m_lpAddFolder,		&QPushButton::clicked,		this,		&cMainWindow::onAddFolder);
+	connect(ui->m_lpRemoveSelected,	&QPushButton::clicked,		this,		&cMainWindow::onRemoveSelected);
+	connect(ui->m_lpClearList,		&QPushButton::clicked,		this,		&cMainWindow::onClearList);
+	connect(ui->m_lpFileList,		&cTreeView::deleteEntrys,	this,		&cMainWindow::onDeleteEntrys);
 
-	connect(ui->m_lpConvert,		&QPushButton::clicked,	this,		&cMainWindow::onConvert);
+	connect(ui->m_lpConvert,		&QPushButton::clicked,		this,		&cMainWindow::onConvert);
 
-	connect(ui->m_lpFileList,		&cTreeView::addEntrys,	this,		&cMainWindow::onAddEntrys);
+	connect(ui->m_lpFileList,		&cTreeView::addEntrys,		this,		&cMainWindow::onAddEntrys);
 
-	connect(ui->m_lpThumbnailSize,	&QSlider::valueChanged,	this,		&cMainWindow::onThumbnailSize);
+	connect(ui->m_lpThumbnailSize,	&QSlider::valueChanged,		this,		&cMainWindow::onThumbnailSize);
 }
 
 void cMainWindow::createContextActions()
@@ -266,10 +269,17 @@ void cMainWindow::onAddFolder()
 
 void cMainWindow::onRemoveSelected()
 {
+	onDeleteEntrys();
 }
 
 void cMainWindow::onClearList()
 {
+	if(!m_lpFileListModel->rowCount())
+		return;
+
+	if(QMessageBox::question(this, tr("Delete"), tr("Do you want to clear the list?")) == QMessageBox::No)
+		return;
+
 	m_lpFileListModel->clear();
 
 	QStringList			headerLabels	= QStringList() << tr("path") << tr("file") << tr("size") << tr("date") << tr("width") << tr("height") << ("");
@@ -352,7 +362,7 @@ void cMainWindow::addFile(const QString& file)
 	items.append(new QStandardItem(QString::number(lpExif->imageHeight())));
 
 	items[0]->setIcon(QIcon(QPixmap::fromImage(lpExif->thumbnail())));
-	items[0]->setCheckable(true);
+//	items[0]->setCheckable(true);
 	items[2]->setTextAlignment(Qt::AlignRight | Qt::AlignCenter);
 	items[3]->setTextAlignment(Qt::AlignRight | Qt::AlignCenter);
 	items[4]->setTextAlignment(Qt::AlignRight | Qt::AlignCenter);
@@ -606,5 +616,19 @@ QString cMainWindow::findFreeFileName(const QString& fileName)
 		if(!QFileInfo::exists(newName))
 			return(newName);
 	}
-//	return("");
+}
+
+void cMainWindow::onDeleteEntrys()
+{
+	if(!ui->m_lpFileList->selectionModel()->selectedIndexes().count())
+		return;
+
+	if(QMessageBox::question(this, tr("Delete"), tr("Do you want to delete selected items?")) == QMessageBox::No)
+		return;
+
+	while(!ui->m_lpFileList->selectionModel()->selectedIndexes().isEmpty())
+	{
+		auto idx	= ui->m_lpFileList->selectionModel()->selectedIndexes().first();
+		m_lpFileListModel->removeRow(idx.row(), idx.parent());
+	}
 }
