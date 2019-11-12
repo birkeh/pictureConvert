@@ -76,27 +76,77 @@ bool cEXIF::fromFile(const QString& szFileName)
 				QImage							image;
 				image.loadFromData(static_cast<const uchar*>(previewImage.pData()), static_cast<qint32>(previewImage.size()));
 
-				QTransform	rotation;
-				int			angle	= 0;
+//				QTransform	rotation;
+//				int			angle	= 0;
 
-				switch(imageOrientation())
-				{
-				case 8:
-					angle	= 270;
-					break;
-				case 3:
-					angle	= 180;
-					break;
-				case 6:
-					angle	=  90;
-					break;
-				}
+//				switch(imageOrientation())
+//				{
+//				case 8:
+//					angle	= 270;
+//					break;
+//				case 3:
+//					angle	= 180;
+//					break;
+//				case 6:
+//					angle	=  90;
+//					break;
+//				}
 
-				if(angle != 0)
+//				if(angle != 0)
+//				{
+//					rotation.rotate(angle);
+//					image	= image.transformed(rotation);
+//				}
+
+				m_previewList.append(image);
+			}
+		}
+
+		if(!exifData.empty())
+		{
+			Exiv2::ExifData::const_iterator	end			= exifData.end();
+			for(Exiv2::ExifData::const_iterator i = exifData.begin(); i != end; ++i)
+			{
+				cEXIFTag*	lpTag	= m_exifTagList.find(i->tag(), i->ifdId());
+
+				if(lpTag)
 				{
-					rotation.rotate(angle);
-					image	= image.transformed(rotation);
+					cEXIFValue*	lpValue	= m_exifValueList.add(lpTag);
+					if(lpValue)
+						lpValue->setValue(QString::fromStdString(i->value().toString()), i->typeId(), i->count());
 				}
+			}
+
+			Exiv2::PreviewManager			previewManager(*image);
+			Exiv2::PreviewPropertiesList	previewPropertiesList	= previewManager.getPreviewProperties();
+
+			for(Exiv2::PreviewPropertiesList::const_iterator i = previewPropertiesList.begin();i != previewPropertiesList.end();i++)
+			{
+				Exiv2::PreviewImage				previewImage			= previewManager.getPreviewImage(*i);
+				QImage							image;
+				image.loadFromData(static_cast<const uchar*>(previewImage.pData()), static_cast<qint32>(previewImage.size()));
+
+//				QTransform	rotation;
+//				int			angle	= 0;
+
+//				switch(imageOrientation())
+//				{
+//				case 8:
+//					angle	= 270;
+//					break;
+//				case 3:
+//					angle	= 180;
+//					break;
+//				case 6:
+//					angle	=  90;
+//					break;
+//				}
+
+//				if(angle != 0)
+//				{
+//					rotation.rotate(angle);
+//					image	= image.transformed(rotation);
+//				}
 
 				m_previewList.append(image);
 			}
@@ -127,77 +177,27 @@ bool cEXIF::fromFile(const QString& szFileName)
 				QImage							image;
 				image.loadFromData(static_cast<const uchar*>(previewImage.pData()), static_cast<qint32>(previewImage.size()));
 
-				QTransform	rotation;
-				int			angle	= 0;
+//				QTransform	rotation;
+//				int			angle	= 0;
 
-				switch(imageOrientation())
-				{
-				case 8:
-					angle	= 270;
-					break;
-				case 3:
-					angle	= 180;
-					break;
-				case 6:
-					angle	=  90;
-					break;
-				}
+//				switch(imageOrientation())
+//				{
+//				case 8:
+//					angle	= 270;
+//					break;
+//				case 3:
+//					angle	= 180;
+//					break;
+//				case 6:
+//					angle	=  90;
+//					break;
+//				}
 
-				if(angle != 0)
-				{
-					rotation.rotate(angle);
-					image	= image.transformed(rotation);
-				}
-
-				m_previewList.append(image);
-			}
-		}
-
-		if(!exifData.empty())
-		{
-			Exiv2::ExifData::const_iterator	end			= exifData.end();
-			for(Exiv2::ExifData::const_iterator i = exifData.begin(); i != end; ++i)
-			{
-				cEXIFTag*	lpTag	= m_exifTagList.find(i->tag(), i->ifdId());
-
-				if(lpTag)
-				{
-					cEXIFValue*	lpValue	= m_exifValueList.add(lpTag);
-					if(lpValue)
-						lpValue->setValue(QString::fromStdString(i->value().toString()), i->typeId(), i->count());
-				}
-			}
-
-			Exiv2::PreviewManager			previewManager(*image);
-			Exiv2::PreviewPropertiesList	previewPropertiesList	= previewManager.getPreviewProperties();
-
-			for(Exiv2::PreviewPropertiesList::const_iterator i = previewPropertiesList.begin();i != previewPropertiesList.end();i++)
-			{
-				Exiv2::PreviewImage				previewImage			= previewManager.getPreviewImage(*i);
-				QImage							image;
-				image.loadFromData(static_cast<const uchar*>(previewImage.pData()), static_cast<qint32>(previewImage.size()));
-
-				QTransform	rotation;
-				int			angle	= 0;
-
-				switch(imageOrientation())
-				{
-				case 8:
-					angle	= 270;
-					break;
-				case 3:
-					angle	= 180;
-					break;
-				case 6:
-					angle	=  90;
-					break;
-				}
-
-				if(angle != 0)
-				{
-					rotation.rotate(angle);
-					image	= image.transformed(rotation);
-				}
+//				if(angle != 0)
+//				{
+//					rotation.rotate(angle);
+//					image	= image.transformed(rotation);
+//				}
 
 				m_previewList.append(image);
 			}
@@ -278,7 +278,31 @@ bool cEXIF::fromFile(const QString& szFileName)
 		}
 
 		if(index != -1)
+		{
+			QTransform	rotation;
+			int			angle	= 0;
+
+			switch(imageOrientation())
+			{
+			case 8:
+				angle	= 270;
+				break;
+			case 3:
+				angle	= 180;
+				break;
+			case 6:
+				angle	=  90;
+				break;
+			}
+
 			m_thumbnail	= m_previewList[index].scaled(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+			if(angle != 0)
+			{
+				rotation.rotate(angle);
+				m_thumbnail	= m_thumbnail.transformed(rotation);
+			}
+		}
 	}
 
 	return(true);

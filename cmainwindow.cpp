@@ -526,7 +526,7 @@ OVERWRITE cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* l
 			destFile	= fileInfo.baseName() + "_converted" + "." + extension;
 			break;
 		case FILE_ADD_TAG:
-			destFile	= replaceTags(fileInfo.baseName(), lpExif, extension, false) + "." + extension;
+			destFile	= replaceTags(exportSettings.fileTag, lpExif, extension, false) + "." + extension;
 			break;
 		}
 		break;
@@ -574,6 +574,28 @@ OVERWRITE cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* l
 	cImage			image(lpExif->fileName());
 	if(!image.isNull())
 	{
+		QTransform	rotation;
+		int			angle	= 0;
+
+		switch(lpExif->imageOrientation())
+		{
+		case 8:
+			angle	= 270;
+			break;
+		case 3:
+			angle	= 180;
+			break;
+		case 6:
+			angle	=  90;
+			break;
+		}
+
+		if(angle != 0)
+		{
+			rotation.rotate(angle);
+			image	= image.transformed(rotation);
+		}
+
 		QFileInfo	info(destFile);
 
 		if(info.exists())
