@@ -3,6 +3,8 @@
 
 */
 
+#include "common.h"
+
 #include "cmainwindow.h"
 #include "ui_cmainwindow.h"
 
@@ -104,7 +106,7 @@ void cMainWindow::initUI()
 	m_lpProgressBar->setVisible(false);
 	ui->m_lpStatusBar->addPermanentWidget(m_lpProgressBar);
 
-	QStringList			headerLabels	= QStringList() << tr("path") << tr("file") << tr("size") << tr("date") << tr("width") << tr("height") << ("");
+	QStringList			headerLabels	= QStringList() << tr("icon") << tr("path") << tr("file") << tr("size") << tr("date") << tr("width") << tr("height") << ("");
 	m_lpFileListModel->setHorizontalHeaderLabels(headerLabels);
 }
 
@@ -293,7 +295,7 @@ void cMainWindow::onClearList()
 
 	m_lpFileListModel->clear();
 
-	QStringList			headerLabels	= QStringList() << tr("path") << tr("file") << tr("size") << tr("date") << tr("width") << tr("height") << ("");
+	QStringList			headerLabels	= QStringList() << tr("icon") << tr("path") << tr("file") << tr("size") << tr("date") << tr("width") << tr("height") << ("");
 	m_lpFileListModel->setHorizontalHeaderLabels(headerLabels);
 
 	countImages();
@@ -369,6 +371,15 @@ void cMainWindow::addFile(const QString& file)
 
 	QList<QStandardItem*>	items;
 
+	QImage	thumbnail	= lpExif->thumbnail();
+
+	QImage		thumb(THUMBNAIL_WIDTH, thumbnail.height(), QImage::Format_ARGB32);
+	thumb.fill(qRgba(0, 0, 0, 0));
+	QPainter	painter(&thumb);
+	painter.drawImage((THUMBNAIL_WIDTH-thumbnail.width())/2, 0, thumbnail);
+	QIcon		icon	= QIcon(QPixmap::fromImage(thumb));
+
+	items.append(new QStandardItem(""));
 	items.append(new QStandardItem(info.path()));
 	items.append(new QStandardItem(info.fileName()));
 	items.append(new QStandardItem(QString::number(info.size()/1024)+" kb"));
@@ -376,12 +387,12 @@ void cMainWindow::addFile(const QString& file)
 	items.append(new QStandardItem(QString::number(lpExif->imageWidth())));
 	items.append(new QStandardItem(QString::number(lpExif->imageHeight())));
 
-	items[0]->setIcon(QIcon(QPixmap::fromImage(lpExif->thumbnail())));
-//	items[0]->setCheckable(true);
-	items[2]->setTextAlignment(Qt::AlignRight | Qt::AlignCenter);
+	items[0]->setIcon(icon);
+	items[0]->setTextAlignment(Qt::AlignHCenter | Qt::AlignCenter);
 	items[3]->setTextAlignment(Qt::AlignRight | Qt::AlignCenter);
 	items[4]->setTextAlignment(Qt::AlignRight | Qt::AlignCenter);
 	items[5]->setTextAlignment(Qt::AlignRight | Qt::AlignCenter);
+	items[6]->setTextAlignment(Qt::AlignRight | Qt::AlignCenter);
 
 	items[0]->setData(QVariant::fromValue(lpExif), Qt::UserRole+1);
 
@@ -728,6 +739,14 @@ QString cMainWindow::replaceTags(const QString& path, cEXIF* lpExif, const QStri
 {
 	QString		dest	= path;
 	QFileInfo	fileInfo(lpExif->fileName());
+	QString		model	= lpExif->cameraModel().replace("/", "_").replace("\\", "_").replace(":", "_");
+	QString		maker	= lpExif->cameraMake().replace("/", "_").replace("\\", "_").replace(":", "_");
+
+	if(model.isEmpty())
+		model	= "UNKNOWN";
+
+	if(maker.isEmpty())
+		maker	= "UNKNOWN";
 
 	if(directory)
 		dest	= dest.replace("%o", fileInfo.absolutePath());
@@ -740,12 +759,19 @@ QString cMainWindow::replaceTags(const QString& path, cEXIF* lpExif, const QStri
 	dest		= dest.replace("%H", lpExif->dateTime().toString("hh"));
 	dest		= dest.replace("%M", lpExif->dateTime().toString("mm"));
 	dest		= dest.replace("%S", lpExif->dateTime().toString("ss"));
+	dest		= dest.replace("%c", maker);
+	dest		= dest.replace("%l", model);
 	dest		= dest.replace("%t", extension);
 
 	dest		= dest.replace("\\", "/");
 
 	return(dest);
 }
+
+/*
+	if(!lpPicture->cameraModel().isEmpty())
+		szPath.append("/" + lpPicture->cameraModel().replace("/", "_").replace("\\", "_").replace(":", "_"));
+*/
 
 QString cMainWindow::findFreeFileName(const QString& fileName)
 {

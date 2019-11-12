@@ -135,6 +135,12 @@ private slots:
 	 \param text
 	*/
 	void							onFileFormatChanged(const QString &text);
+	/*!
+	 \brief
+
+	 \fn onPathSelect
+	*/
+	void							onPathSelect();
 
 protected:
 };

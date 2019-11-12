@@ -9,6 +9,7 @@
 #include <QSettings>
 #include <QCloseEvent>
 #include <QImageWriter>
+#include <QFileDialog>
 
 
 cExportDialog::cExportDialog(const QList<IMAGEFORMAT>& imageFormats, QWidget *parent) :
@@ -210,6 +211,8 @@ void cExportDialog::initUI(const QList<IMAGEFORMAT>& imageFormats)
 								 "<tr><td>%H</td><td>hour of picture taken</td></tr>"
 								 "<tr><td>%M</td><td>minute of picture taken</td></tr>"
 								 "<tr><td>%S</td><td>second of picture taken</td></tr>"
+								 "<tr><td>%c</td><td>camera manufacturer</td></tr>"
+								 "<tr><td>%l</td><td>camera model</td></tr>"
 								 "<tr><td>%t</td><td>type of created picture</td></tr>"
 								 "</table>");
 	ui->m_lpFileTagHelp->setText("<table>"
@@ -220,6 +223,8 @@ void cExportDialog::initUI(const QList<IMAGEFORMAT>& imageFormats)
 								 "<tr><td>%H</td><td>hour of picture taken</td></tr>"
 								 "<tr><td>%M</td><td>minute of picture taken</td></tr>"
 								 "<tr><td>%S</td><td>second of picture taken</td></tr>"
+								 "<tr><td>%c</td><td>camera manufacturer</td></tr>"
+								 "<tr><td>%l</td><td>camera model</td></tr>"
 								 "<tr><td>%t</td><td>type of created picture</td></tr>"
 								 "</table>");
 
@@ -238,6 +243,8 @@ void cExportDialog::createActions()
 	connect(ui->m_lpFileOverwriteMethod,	QOverload<int>::of(&QButtonGroup::buttonClicked),	this,	&cExportDialog::onFileOverwriteMethodChanged);
 
 	connect(ui->m_lpFileFormat,				&QComboBox::currentTextChanged,						this,	&cExportDialog::onFileFormatChanged);
+
+	connect(ui->m_lpDestinationPathBrowse,	&QPushButton::clicked,								this,	&cExportDialog::onPathSelect);
 }
 
 void cExportDialog::onQualityChanged(int value)
@@ -316,6 +323,18 @@ void cExportDialog::onFileFormatChanged(const QString &text)
 		ui->m_lpQuality->setEnabled(false);
 		ui->m_lpQualityValue->setEnabled(false);
 	}
+}
+
+void cExportDialog::onPathSelect()
+{
+	QSettings	settings;
+	QString		szPath	= settings.value("export/path", QDir::homePath()).toString();
+	szPath	= QFileDialog::getExistingDirectory(this, tr("Export Directory"), szPath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	if(szPath.isEmpty())
+		return;
+
+	ui->m_lpDestinationPath->setText(szPath);
 }
 
 /*

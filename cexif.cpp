@@ -76,28 +76,6 @@ bool cEXIF::fromFile(const QString& szFileName)
 				QImage							image;
 				image.loadFromData(static_cast<const uchar*>(previewImage.pData()), static_cast<qint32>(previewImage.size()));
 
-//				QTransform	rotation;
-//				int			angle	= 0;
-
-//				switch(imageOrientation())
-//				{
-//				case 8:
-//					angle	= 270;
-//					break;
-//				case 3:
-//					angle	= 180;
-//					break;
-//				case 6:
-//					angle	=  90;
-//					break;
-//				}
-
-//				if(angle != 0)
-//				{
-//					rotation.rotate(angle);
-//					image	= image.transformed(rotation);
-//				}
-
 				m_previewList.append(image);
 			}
 		}
@@ -125,28 +103,6 @@ bool cEXIF::fromFile(const QString& szFileName)
 				Exiv2::PreviewImage				previewImage			= previewManager.getPreviewImage(*i);
 				QImage							image;
 				image.loadFromData(static_cast<const uchar*>(previewImage.pData()), static_cast<qint32>(previewImage.size()));
-
-//				QTransform	rotation;
-//				int			angle	= 0;
-
-//				switch(imageOrientation())
-//				{
-//				case 8:
-//					angle	= 270;
-//					break;
-//				case 3:
-//					angle	= 180;
-//					break;
-//				case 6:
-//					angle	=  90;
-//					break;
-//				}
-
-//				if(angle != 0)
-//				{
-//					rotation.rotate(angle);
-//					image	= image.transformed(rotation);
-//				}
 
 				m_previewList.append(image);
 			}
@@ -176,28 +132,6 @@ bool cEXIF::fromFile(const QString& szFileName)
 				Exiv2::PreviewImage				previewImage			= previewManager.getPreviewImage(*i);
 				QImage							image;
 				image.loadFromData(static_cast<const uchar*>(previewImage.pData()), static_cast<qint32>(previewImage.size()));
-
-//				QTransform	rotation;
-//				int			angle	= 0;
-
-//				switch(imageOrientation())
-//				{
-//				case 8:
-//					angle	= 270;
-//					break;
-//				case 3:
-//					angle	= 180;
-//					break;
-//				case 6:
-//					angle	=  90;
-//					break;
-//				}
-
-//				if(angle != 0)
-//				{
-//					rotation.rotate(angle);
-//					image	= image.transformed(rotation);
-//				}
 
 				m_previewList.append(image);
 			}
