@@ -21,7 +21,7 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
-LicenseFile=C:\Users\VET0572\Documents\github\pictureConvert\LICENSE
+LicenseFile=C:\Users\birkeh\Documents\github\pictureConvert\LICENSE
 OutputBaseFilename=setup
 Compression=lzma
 SolidCompression=yes
@@ -35,8 +35,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\VET0572\Documents\github\build-pictureConvert-Desktop_Qt_5_13_2_MinGW_64_bit-Release\deploy\pictureConvert.exe"; DestDir: "{app}"; Flags: ignoreversion 64bit
-Source: "C:\Users\VET0572\Documents\github\build-pictureConvert-Desktop_Qt_5_13_2_MinGW_64_bit-Release\deploy\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs 64bit
+Source: "..\build-pictureConvert-Desktop_Qt_5_13_2_MinGW_64_bit-Release\deploy\pictureConvert.exe"; DestDir: "{app}"; Flags: ignoreversion 64bit
+Source: "..\build-pictureConvert-Desktop_Qt_5_13_2_MinGW_64_bit-Release\deploy\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs 64bit
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
