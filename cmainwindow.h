@@ -130,8 +130,8 @@ private:
 	QStandardItemModel*				m_lpFileListModel;			/*!< TODO: describe */
 	QProgressBar*					m_lpProgressBar;			/*!< TODO: describe */
 
-	QMimeDatabase					m_mimeDB;
-	QList<IMAGEFORMAT>				m_imageFormats;
+	QMimeDatabase					m_mimeDB;					/*!< TODO: describe */
+	QList<IMAGEFORMAT>				m_imageFormats;				/*!< TODO: describe */
 
 	bool							m_working;					/*!< TODO: describe */
 
@@ -245,6 +245,13 @@ private:
 	 \param writeList
 	*/
 	void							addImageFormat(const char* shortName, const char* description, const char* extension, QList<QByteArray>& readList, QList<QByteArray>& writeList);
+
+	/*!
+	 \brief
+
+	 \fn countImages
+	*/
+	void							countImages();
 
 private slots:
 	/*!

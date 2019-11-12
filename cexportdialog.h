@@ -128,6 +128,13 @@ private slots:
 	 \param id
 	*/
 	void							onFileOverwriteMethodChanged(int id);
+	/*!
+	 \brief
+
+	 \fn onFileFormatChanged
+	 \param text
+	*/
+	void							onFileFormatChanged(const QString &text);
 
 protected:
 };

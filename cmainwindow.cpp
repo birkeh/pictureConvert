@@ -38,6 +38,8 @@ cMainWindow::cMainWindow(cSplashScreen* lpSplashScreen, QWidget *parent) :
 	createActions();
 
 	setImageFormats();
+
+	countImages();
 }
 
 cMainWindow::~cMainWindow()
@@ -270,6 +272,8 @@ void cMainWindow::onAddFolder()
 
 	ui->m_lpStatusBar->showMessage(tr("done."), 3000);
 	m_working	= false;
+
+	countImages();
 }
 
 void cMainWindow::onRemoveSelected()
@@ -289,6 +293,8 @@ void cMainWindow::onClearList()
 
 	QStringList			headerLabels	= QStringList() << tr("path") << tr("file") << tr("size") << tr("date") << tr("width") << tr("height") << ("");
 	m_lpFileListModel->setHorizontalHeaderLabels(headerLabels);
+
+	countImages();
 }
 
 void cMainWindow::onAddEntrys(const QStringList& fileList)
@@ -319,6 +325,8 @@ void cMainWindow::onAddEntrys(const QStringList& fileList)
 
 	ui->m_lpStatusBar->showMessage(tr("done."), 3000);
 	m_working	= false;
+
+	countImages();
 }
 
 void cMainWindow::addPath(const QString& path, bool recursive)
@@ -377,6 +385,7 @@ void cMainWindow::addFile(const QString& file)
 
 	m_lpFileListModel->appendRow(items);
 
+	countImages();
 	qApp->processEvents();
 }
 
@@ -432,7 +441,7 @@ void cMainWindow::doExport()
 
 		overwrite	= exportFile(exportSettings, lpExif, overwrite);
 
-		m_lpProgressBar->setValue(i);
+		m_lpProgressBar->setValue(i+1);
 		qApp->processEvents();
 	}
 
@@ -598,9 +607,9 @@ OVERWRITE cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* l
 
 		QFileInfo	info(destFile);
 
-		if(info.exists())
-			qDebug() << "MACHMA NED!!!";
-		else
+//		if(info.exists())
+//			qDebug() << "MACHMA NED!!!";
+//		else
 		{
 			ui->m_lpStatusBar->showMessage(QString(tr("converting to %1...")).arg(destFile));
 			qApp->processEvents();
@@ -609,7 +618,7 @@ OVERWRITE cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* l
 			QFileInfo	info(destFile);
 
 			if(dir.mkpath(info.absolutePath()))
-				image.save(destFile);
+				image.save(destFile, nullptr, exportSettings.quality);
 		}
 	}
 
@@ -667,4 +676,18 @@ void cMainWindow::onDeleteEntrys()
 		auto idx	= ui->m_lpFileList->selectionModel()->selectedIndexes().first();
 		m_lpFileListModel->removeRow(idx.row(), idx.parent());
 	}
+
+	countImages();
+}
+
+void cMainWindow::countImages()
+{
+	int		count	= m_lpFileListModel->rowCount();
+
+	ui->m_lpStatusBar->showMessage(QString("%1 image(s)").arg(count));
+
+	if(count)
+		ui->m_lpConvert->setEnabled(true);
+	else
+		ui->m_lpConvert->setEnabled(false);
 }

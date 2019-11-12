@@ -8,6 +8,7 @@
 
 #include <QSettings>
 #include <QCloseEvent>
+#include <QImageWriter>
 
 
 cExportDialog::cExportDialog(const QList<IMAGEFORMAT>& imageFormats, QWidget *parent) :
@@ -221,6 +222,8 @@ void cExportDialog::initUI(const QList<IMAGEFORMAT>& imageFormats)
 								 "<tr><td>%S</td><td>second of picture taken</td></tr>"
 								 "<tr><td>%t</td><td>type of created picture</td></tr>"
 								 "</table>");
+
+	onFileFormatChanged(ui->m_lpFileFormat->currentText());
 }
 
 void cExportDialog::createActions()
@@ -233,6 +236,8 @@ void cExportDialog::createActions()
 	connect(ui->m_lpFilenameMethod,			QOverload<int>::of(&QButtonGroup::buttonClicked),	this,	&cExportDialog::onFileMethodChanged);
 	connect(ui->m_lpFilenameAdd,			QOverload<int>::of(&QButtonGroup::buttonClicked),	this,	&cExportDialog::onFileNamePlusChanged);
 	connect(ui->m_lpFileOverwriteMethod,	QOverload<int>::of(&QButtonGroup::buttonClicked),	this,	&cExportDialog::onFileOverwriteMethodChanged);
+
+	connect(ui->m_lpFileFormat,				&QComboBox::currentTextChanged,						this,	&cExportDialog::onFileFormatChanged);
 }
 
 void cExportDialog::onQualityChanged(int value)
@@ -295,3 +300,45 @@ void cExportDialog::onFileOverwriteMethodChanged(int /*id*/)
 {
 	//NOTHING
 }
+
+void cExportDialog::onFileFormatChanged(const QString &text)
+{
+	QString			ext	= text.mid(text.lastIndexOf("*.")+1).replace(")", "");
+	QImageWriter	writer("test" + ext);
+
+	if(writer.supportsOption(QImageIOHandler::Quality))
+	{
+		ui->m_lpQuality->setEnabled(true);
+		ui->m_lpQualityValue->setEnabled(true);
+	}
+	else
+	{
+		ui->m_lpQuality->setEnabled(false);
+		ui->m_lpQualityValue->setEnabled(false);
+	}
+}
+
+/*
+				QImageWriter	writer(destFile);
+
+				qDebug() << "QImageIOHandler::Size: " << writer.supportsOption(QImageIOHandler::Size);
+				qDebug() << "QImageIOHandler::ClipRect: " << writer.supportsOption(QImageIOHandler::ClipRect);
+				qDebug() << "QImageIOHandler::ScaledSize: " << writer.supportsOption(QImageIOHandler::ScaledSize);
+				qDebug() << "QImageIOHandler::ScaledClipRect: " << writer.supportsOption(QImageIOHandler::ScaledClipRect);
+				qDebug() << "QImageIOHandler::Description: " << writer.supportsOption(QImageIOHandler::Description);
+				qDebug() << "QImageIOHandler::CompressionRatio: " << writer.supportsOption(QImageIOHandler::CompressionRatio);
+				qDebug() << "QImageIOHandler::Gamma: " << writer.supportsOption(QImageIOHandler::Gamma);
+				qDebug() << "QImageIOHandler::Quality: " << writer.supportsOption(QImageIOHandler::Quality);
+				qDebug() << "QImageIOHandler::Name: " << writer.supportsOption(QImageIOHandler::Name);
+				qDebug() << "QImageIOHandler::SubType: " << writer.supportsOption(QImageIOHandler::SubType);
+				qDebug() << "QImageIOHandler::IncrementalReading: " << writer.supportsOption(QImageIOHandler::IncrementalReading);
+				qDebug() << "QImageIOHandler::Endianness: " << writer.supportsOption(QImageIOHandler::Endianness);
+				qDebug() << "QImageIOHandler::Animation: " << writer.supportsOption(QImageIOHandler::Animation);
+				qDebug() << "QImageIOHandler::BackgroundColor: " << writer.supportsOption(QImageIOHandler::BackgroundColor);
+				qDebug() << "QImageIOHandler::ImageFormat: " << writer.supportsOption(QImageIOHandler::ImageFormat);
+				qDebug() << "QImageIOHandler::SupportedSubTypes: " << writer.supportsOption(QImageIOHandler::SupportedSubTypes);
+				qDebug() << "QImageIOHandler::OptimizedWrite: " << writer.supportsOption(QImageIOHandler::OptimizedWrite);
+				qDebug() << "QImageIOHandler::ProgressiveScanWrite: " << writer.supportsOption(QImageIOHandler::ProgressiveScanWrite);
+				qDebug() << "QImageIOHandler::ImageTransformation: " << writer.supportsOption(QImageIOHandler::ImageTransformation);
+				qDebug() << "QImageIOHandler::TransformedByDefault: " << writer.supportsOption(QImageIOHandler::TransformedByDefault);
+*/

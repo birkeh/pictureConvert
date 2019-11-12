@@ -191,6 +191,9 @@
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QSlider" name="m_lpQuality">
+              <property name="maximum">
+               <number>100</number>
+              </property>
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -286,9 +289,9 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="m_lpFilenameMethod"/>
+  <buttongroup name="m_lpDirectoryMethod"/>
   <buttongroup name="m_lpFilenameAdd"/>
   <buttongroup name="m_lpFileOverwriteMethod"/>
-  <buttongroup name="m_lpDirectoryMethod"/>
+  <buttongroup name="m_lpFilenameMethod"/>
  </buttongroups>
 </ui>
