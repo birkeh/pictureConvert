@@ -82,6 +82,7 @@ DISTFILES += \
     README.md \
     LICENSE \
     fileFormats.xlsx \
+    installer.iss \
     qdarkstyle/rc/branch_closed-on.png \
     qdarkstyle/rc/branch_closed.png \
     qdarkstyle/rc/branch_open-on.png \
