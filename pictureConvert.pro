@@ -48,6 +48,7 @@ SOURCES += \
     cexportdialog.cpp \
     cfiledialog.cpp \
     cimage.cpp \
+    clogwindow.cpp \
     common.cpp \
     csplashscreen.cpp \
     ctreeview.cpp \
@@ -59,6 +60,7 @@ HEADERS += \
     cexportdialog.h \
     cfiledialog.h \
     cimage.h \
+    clogwindow.h \
     csplashscreen.h \
     cmainwindow.h \
     common.h \
@@ -66,6 +68,7 @@ HEADERS += \
 
 FORMS += \
     cexportdialog.ui \
+    clogwindow.ui \
     cmainwindow.ui
 
 # Default rules for deployment.

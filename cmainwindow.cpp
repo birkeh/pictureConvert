@@ -10,6 +10,8 @@
 #include "cexportdialog.h"
 #include "cfiledialog.h"
 
+#include "clogwindow.h"
+
 #include <QSettings>
 
 #include <QFileInfo>
@@ -418,10 +420,36 @@ void cMainWindow::onThumbnailSize(int size)
 	ui->m_lpFileList->setIconSize(QSize(size, size));
 }
 
+void addToExportLog(QString& exportLog, const QString& text)
+{
+	QDateTime	now	= QDateTime::currentDateTime();
+
+	exportLog.append("    <tr>\n        <td class='time'>" + now.toString("yyyy-mm-dd hh:MM:ss") + "</td>\n        <td>" + text + "</td>\n    </tr>\n");
+}
+
 void cMainWindow::doExport()
 {
 	EXPORTSETTINGS	exportSettings;
 	OVERWRITE		overwrite	= OVERWRITE_ASK;
+
+	m_exportLog	= "<!DOCTYPE html>\n";
+	m_exportLog.append("<html>\n");
+	m_exportLog.append("<head>\n");
+	m_exportLog.append("<style>\n");
+	m_exportLog.append("body       { background-color: white; color: black; }\n");
+	m_exportLog.append("h1         { color: black; }\n");
+	m_exportLog.append("p          { color: black; }\n");
+	m_exportLog.append(".time      { color: darkgrey; }");
+	m_exportLog.append(".title     { color: darkblue; font-style: bold; }");
+	m_exportLog.append(".option    { color: darkmagenta; font-style: italic; }");
+	m_exportLog.append(".optionok  { color: green; font-style: italic; }");
+	m_exportLog.append(".optionnok { color: red; font-style: italic; }");
+	m_exportLog.append("td         { color: black; }\n");
+	m_exportLog.append("</style>\n");
+	m_exportLog.append("</head>\n");
+	m_exportLog.append("<body>\n");
+
+	addToExportLog(m_exportLog, "<span class='title'>Start Export</span>");
 
 	getExportSettings(exportSettings);
 
@@ -447,6 +475,15 @@ void cMainWindow::doExport()
 
 	m_lpProgressBar->setVisible(false);
 	ui->m_lpStatusBar->showMessage(tr("export done."), 3000);
+
+	addToExportLog(m_exportLog, "<b>done.</b>");
+	m_exportLog.append("</body>\n");
+	m_exportLog.append("</html>\n");
+
+	cLogWindow	logWindow;
+
+	logWindow.setText(m_exportLog);
+	logWindow.exec();
 }
 
 void cMainWindow::getExportSettings(EXPORTSETTINGS& exportSettings)
@@ -456,24 +493,31 @@ void cMainWindow::getExportSettings(EXPORTSETTINGS& exportSettings)
 
 	tmp		= settings.value("export/directoryMethod", QVariant::fromValue(QString("keepDirectory"))).toString();
 
-	if(tmp == "newDirectoryTag")
-		exportSettings.directoryMethod	= DIRECTORY_METHOD_TAG;
-	else if(tmp == "newDirectory")
-		exportSettings.directoryMethod	= DIRECTORY_METHOD_NEW;
-	else
-		exportSettings.directoryMethod	= DIRECTORY_METHOD_KEEP;
+	addToExportLog(m_exportLog, "<b>Settings:</b>");
 
 	exportSettings.directory			= settings.value("export/destinationPath", QVariant::fromValue(QString(""))).toString();
 	exportSettings.keepStructure		= settings.value("export/keepStructure", QVariant::fromValue(false)).toBool();
 	exportSettings.directoryTag			= settings.value("export/destinationPathTag", QVariant::fromValue(QString(""))).toString();
 
-
-	tmp		= settings.value("export/fileMethod", QVariant::fromValue(QString("keepFilename"))).toString();
-
-	if(tmp == "newFilename")
-		exportSettings.fileMethod		= FILE_METHOD_RENAME;
+	if(tmp == "newDirectoryTag")
+	{
+		exportSettings.directoryMethod	= DIRECTORY_METHOD_TAG;
+		addToExportLog(m_exportLog, "Directory Name Method: <span class='option'>DIRECTORY_METHOD_TAG</span>");
+		addToExportLog(m_exportLog, " - used TAG: <span class='option'>" + exportSettings.directoryTag + "</span>");
+	}
+	else if(tmp == "newDirectory")
+	{
+		exportSettings.directoryMethod	= DIRECTORY_METHOD_NEW;
+		addToExportLog(m_exportLog, "Directory Name Method: <span class='option'>DIRECTORY_METHOD_NEW</span>");
+		addToExportLog(m_exportLog, " - used Directory: <span class='option'>" + exportSettings.directory + "</span>");
+	}
 	else
-		exportSettings.fileMethod		= FILE_METHOD_KEEP;
+	{
+		exportSettings.directoryMethod	= DIRECTORY_METHOD_KEEP;
+		addToExportLog(m_exportLog, "Directory Name Method: <span class='option'>DIRECTORY_METHOD_KEEP</span>");
+	}
+
+	addToExportLog(m_exportLog, QString("Keep old Structure: <span class='option'>%1</span>").arg(exportSettings.keepStructure ? "yes" : "no"));
 
 
 	tmp		= settings.value("export/filenamePlus", QVariant::fromValue(QString("converted"))).toString();
@@ -485,21 +529,54 @@ void cMainWindow::getExportSettings(EXPORTSETTINGS& exportSettings)
 
 	exportSettings.fileTag				= settings.value("export/fileTag", QVariant::fromValue(QString(""))).toString();
 
+	tmp		= settings.value("export/fileMethod", QVariant::fromValue(QString("keepFilename"))).toString();
+
+	if(tmp == "newFilename")
+	{
+		exportSettings.fileMethod		= FILE_METHOD_RENAME;
+		addToExportLog(m_exportLog, "File Name Method: <span class='option'>FILE_METHOD_RENAME</span>");
+
+		if(exportSettings.fileAdd == FILE_ADD_TAG)
+			addToExportLog(m_exportLog, " - used TAG: <span class='option'>" + exportSettings.fileTag + "</span>");
+		else
+			addToExportLog(m_exportLog, " - add <span class='option'>'_converted'</span>");
+	}
+	else
+	{
+		exportSettings.fileMethod		= FILE_METHOD_KEEP;
+		addToExportLog(m_exportLog, "File Name Method: <span class='option'>FILE_METHOD_KEEP</span>");
+	}
+
+
 	tmp		= settings.value("export/overwrite", QVariant::fromValue(QString("ask"))).toString();
 
 	if(tmp == "overwrite")
+	{
 		exportSettings.fileOverwrite	= FILE_OVERWRITE_OVERWRITE;
+		addToExportLog(m_exportLog, "Existing File Overwrite Mode: <span class='option'>FILE_OVERWRITE_OVERWRITE</span>");
+	}
 	else if(tmp == "rename")
+	{
 		exportSettings.fileOverwrite	= FILE_OVERWRITE_RENAME;
+		addToExportLog(m_exportLog, "Existing File Overwrite Mode: <span class='option'>FILE_OVERWRITE_RENAME</span>");
+	}
 	else
+	{
 		exportSettings.fileOverwrite	= FILE_OVERWRITE_ASK;
+		addToExportLog(m_exportLog, "Existing File Overwrite Mode: <span class='option'>FILE_OVERWRITE_ASK</span>");
+	}
 
 	exportSettings.fileFormat			= settings.value("export/fileFormat").toString();
 	exportSettings.quality				= settings.value("export/quality", QVariant::fromValue(50)).toInt();
+
+	addToExportLog(m_exportLog, "File Format: <span class='option'>" + exportSettings.fileFormat + "</span>");
+	addToExportLog(m_exportLog, "Default Output Quality: <span class='option'>" + QString::number(exportSettings.quality) + "</span>");
 }
 
 OVERWRITE cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* lpExif, OVERWRITE overwrite)
 {
+	addToExportLog(m_exportLog, "Loading file: <span class='option'>" + lpExif->fileName() + "</span>");
+
 	QString		destPath;
 	QString		destFile;
 	QFileInfo	fileInfo(lpExif->fileName());
@@ -544,6 +621,8 @@ OVERWRITE cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* l
 	destFile.prepend(destPath + "/");
 	QFileInfo	destInfo(destFile);
 
+	addToExportLog(m_exportLog, "Destination: <span class='option'>" + destFile + "</span>");
+
 	if(destInfo.exists() && overwrite != OVERWRITE_ALL)
 	{
 		switch(exportSettings.fileOverwrite)
@@ -552,14 +631,24 @@ OVERWRITE cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* l
 			{
 				QMessageBox::StandardButton	ret	= QMessageBox::question(this, tr("File Exists"), QString(tr("File %1 exists. Do you want to overwrite?")).arg(destFile), QMessageBox::Yes | QMessageBox::No | QMessageBox::YesAll | QMessageBox::NoAll);
 				if(ret == QMessageBox::YesAll)
+				{
 					overwrite	= OVERWRITE_ALL;
+					addToExportLog(m_exportLog, "New Option: <span class='optionok'>overwrite all</span>");
+				}
 				else if(ret == QMessageBox::NoAll)
 				{
 					overwrite	= OVERWRITE_NONE;
+					addToExportLog(m_exportLog, "New Option: <span class='optionnok'>overwrite none</span>");
+					addToExportLog(m_exportLog, "<span class='optionnok'>aborting, destination file exists</span>");
 					return(overwrite);
 				}
 				else if(ret == QMessageBox::No)
+				{
+					addToExportLog(m_exportLog, "<span class='optionnok'>aborting, destination file exists</span>");
 					return(overwrite);
+				}
+				else
+					addToExportLog(m_exportLog, "<span class='optionok'>file exists, overwrite</span>");
 			}
 			break;
 		case FILE_OVERWRITE_RENAME:
@@ -567,15 +656,20 @@ OVERWRITE cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* l
 			if(destFile.isEmpty())
 			{
 				QMessageBox::information(this, tr("File Export"), QString("%1 cannot be renamed.").arg(lpExif->fileName()));
+				addToExportLog(m_exportLog, "<span class='optionnok'>aborting, file cannot be renamed</span>");
 				return(overwrite);
 			}
+			addToExportLog(m_exportLog, "renaming to <span class='optionok'>" + destFile + "</span>");
 			break;
 		case FILE_OVERWRITE_OVERWRITE:
 			break;
 		}
 	}
 	else if(overwrite == OVERWRITE_NONE)
+	{
+		addToExportLog(m_exportLog, "<span class='optionnok'>aborting, destination file exists</span>");
 		return(overwrite);
+	}
 
 	ui->m_lpStatusBar->showMessage(QString(tr("loading %1...")).arg(lpExif->fileName()));
 	qApp->processEvents();
@@ -605,20 +699,25 @@ OVERWRITE cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* l
 			image	= image.transformed(rotation);
 		}
 
+		addToExportLog(m_exportLog, "Loading file: <span class='optionok'>successful</span>");
+
 		QFileInfo	info(destFile);
 
-//		if(info.exists())
-//			qDebug() << "MACHMA NED!!!";
-//		else
+		ui->m_lpStatusBar->showMessage(QString(tr("converting to %1...")).arg(destFile));
+		qApp->processEvents();
+
+		QDir		dir;
+
+		if(dir.mkpath(info.absolutePath()))
 		{
-			ui->m_lpStatusBar->showMessage(QString(tr("converting to %1...")).arg(destFile));
-			qApp->processEvents();
+			QImageWriter	writer(destFile);
 
-			QDir		dir;
-			QFileInfo	info(destFile);
-
-			if(dir.mkpath(info.absolutePath()))
-				image.save(destFile, nullptr, exportSettings.quality);
+			addToExportLog(m_exportLog, "Writing file: <span class='option'>" + destFile + "</span>");
+			writer.setQuality(exportSettings.quality);
+			if(writer.write(image))
+				addToExportLog(m_exportLog, "Writing file: <span class='optionok'>successful</span>");
+			else
+				addToExportLog(m_exportLog, "Writing file: <span class='optionnok'>error: " + writer.errorString() + "</span>");
 		}
 	}
 

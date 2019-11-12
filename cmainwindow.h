@@ -135,6 +135,8 @@ private:
 
 	bool							m_working;					/*!< TODO: describe */
 
+	QString							m_exportLog;				/*!< TODO: describe */
+
 	/*!
 	 \brief
 
