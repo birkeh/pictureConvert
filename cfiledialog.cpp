@@ -1,3 +1,8 @@
+/*!
+ \file cfiledialog.cpp
+
+*/
+
 #include "cfiledialog.h"
 
 #include <QGridLayout>

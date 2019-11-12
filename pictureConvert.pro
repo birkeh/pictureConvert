@@ -78,6 +78,7 @@ RESOURCES += \
     qdarkstyle/style.qrc
 
 DISTFILES += \
+    Doxyfile \
     README.md \
     LICENSE \
     fileFormats.xlsx \

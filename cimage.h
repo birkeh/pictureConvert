@@ -13,23 +13,121 @@
 #include <QImage>
 
 
+/*!
+ \brief
+
+ \class cImage cimage.h "cimage.h"
+*/
 class cImage : public QImage
 {
 public:
 	cImage();
+	/*!
+	 \brief
+
+	 \fn cImage
+	 \param size
+	 \param format
+	*/
 	cImage(const QSize &size, QImage::Format format);
+	/*!
+	 \brief
+
+	 \fn cImage
+	 \param width
+	 \param height
+	 \param format
+	*/
 	cImage(int width, int height, QImage::Format format);
+	/*!
+	 \brief
+
+	 \fn cImage
+	 \param data
+	 \param width
+	 \param height
+	 \param format
+	 \param cleanupFunction
+	 \param cleanupInfo
+	*/
 	cImage(uchar *data, int width, int height, QImage::Format format, QImageCleanupFunction cleanupFunction = nullptr, void *cleanupInfo = nullptr);
+	/*!
+	 \brief
+
+	 \fn cImage
+	 \param data
+	 \param width
+	 \param height
+	 \param format
+	 \param cleanupFunction
+	 \param cleanupInfo
+	*/
 	cImage(const uchar *data, int width, int height, QImage::Format format, QImageCleanupFunction cleanupFunction = nullptr, void *cleanupInfo = nullptr);
+	/*!
+	 \brief
+
+	 \fn cImage
+	 \param data
+	 \param width
+	 \param height
+	 \param bytesPerLine
+	 \param format
+	 \param cleanupFunction
+	 \param cleanupInfo
+	*/
 	cImage(uchar *data, int width, int height, int bytesPerLine, QImage::Format format, QImageCleanupFunction cleanupFunction = nullptr, void *cleanupInfo = nullptr);
+	/*!
+	 \brief
+
+	 \fn cImage
+	 \param data
+	 \param width
+	 \param height
+	 \param bytesPerLine
+	 \param format
+	 \param cleanupFunction
+	 \param cleanupInfo
+	*/
 	cImage(const uchar *data, int width, int height, int bytesPerLine, QImage::Format format, QImageCleanupFunction cleanupFunction = nullptr, void *cleanupInfo = nullptr);
+	/*!
+	 \brief
+
+	 \fn cImage
+	 \param fileName
+	 \param format
+	*/
 	cImage(const QString &fileName, const char *format = nullptr);
+	/*!
+	 \brief
+
+	 \fn cImage
+	 \param image
+	*/
 	cImage(const QImage &image);
+	/*!
+	 \brief
+
+	 \fn cImage
+	 \param other
+	*/
 	cImage(QImage &&other);
 
+	/*!
+	 \brief
+
+	 \fn load
+	 \param fileName
+	 \param format
+	 \return bool
+	*/
 	bool	load(const QString &fileName, const char *format = nullptr);
 
 protected:
+	/*!
+	 \brief
+
+	 \enum Cam
+	*/
 	enum Cam
 	{
 		camera_unknown	= 0,
@@ -39,6 +137,13 @@ protected:
 	};
 
 	template <typename num>
+	/*!
+	 \brief
+
+	 \fn clip
+	 \param val
+	 \return num
+	*/
 	num clip(float val) const
 	{
 		int vr = qRound(val);
@@ -54,6 +159,13 @@ protected:
 	}
 
 	template <typename num>
+	/*!
+	 \brief
+
+	 \fn clip
+	 \param val
+	 \return num
+	*/
 	num clip(double val) const
 	{
 		int vr = qRound(val);
@@ -69,6 +181,13 @@ protected:
 	}
 
 	template <typename num>
+	/*!
+	 \brief
+
+	 \fn clip
+	 \param val
+	 \return num
+	*/
 	num clip(int val) const
 	{
 		int vr = qRound(static_cast<double>(val));
@@ -84,22 +203,101 @@ protected:
 	}
 
 private:
-	bool	m_isChromatic;
-	Cam		m_camType;
+	bool	m_isChromatic;		/*!< TODO: describe */
+	Cam		m_camType;			/*!< TODO: describe */
 
+	/*!
+	 \brief
+
+	 \fn loadRAW
+	 \param fileName
+	 \return bool
+	*/
 	bool	loadRAW(const QString &fileName);
 
+	/*!
+	 \brief
+
+	 \fn openBuffer
+	 \param fileName
+	 \param ba
+	 \param iProcessor
+	 \return bool
+	*/
 	bool	openBuffer(const QString &fileName, const QSharedPointer<QByteArray>& ba, LibRaw& iProcessor);
+	/*!
+	 \brief
+
+	 \fn detectSpecialCamera
+	 \param iProcessor
+	*/
 	void	detectSpecialCamera(const LibRaw & iProcessor);
 
+	/*!
+	 \brief
+
+	 \fn demosaic
+	 \param iProcessor
+	 \return cv::Mat
+	*/
 	cv::Mat	demosaic(LibRaw & iProcessor);
+	/*!
+	 \brief
+
+	 \fn prepareImg
+	 \param iProcessor
+	 \return cv::Mat
+	*/
 	cv::Mat	prepareImg(const LibRaw & iProcessor);
+	/*!
+	 \brief
+
+	 \fn whiteBalance
+	 \param iProcessor
+	 \param img
+	*/
 	void	whiteBalance(const LibRaw & iProcessor, cv::Mat & img);
+	/*!
+	 \brief
+
+	 \fn whiteMultipliers
+	 \param iProcessor
+	 \return cv::Mat
+	*/
 	cv::Mat	whiteMultipliers(const LibRaw & iProcessor);
+	/*!
+	 \brief
+
+	 \fn gammaCorrection
+	 \param iProcessor
+	 \param img
+	*/
 	void	gammaCorrection(const LibRaw & iProcessor, cv::Mat& img);
+	/*!
+	 \brief
+
+	 \fn gammaTable
+	 \param iProcessor
+	 \return cv::Mat
+	*/
 	cv::Mat	gammaTable(const LibRaw & iProcessor);
 
+	/*!
+	 \brief
+
+	 \fn raw2Img
+	 \param iProcessor
+	 \param img
+	 \return QImage
+	*/
 	QImage	raw2Img(const LibRaw & iProcessor, cv::Mat & img);
+	/*!
+	 \brief
+
+	 \fn mat2QImage
+	 \param img
+	 \return QImage
+	*/
 	QImage	mat2QImage(cv::Mat img);
 };
 

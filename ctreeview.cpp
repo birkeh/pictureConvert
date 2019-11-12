@@ -1,3 +1,8 @@
+/*!
+ \file ctreeview.cpp
+
+*/
+
 #include "ctreeview.h"
 
 #include <QDropEvent>

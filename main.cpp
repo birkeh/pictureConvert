@@ -1,3 +1,8 @@
+/*!
+ \file main.cpp
+
+*/
+
 #include "cmainwindow.h"
 
 #include <QApplication>

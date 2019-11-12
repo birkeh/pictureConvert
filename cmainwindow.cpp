@@ -1,3 +1,8 @@
+/*!
+ \file cmainwindow.cpp
+
+*/
+
 #include "cmainwindow.h"
 #include "ui_cmainwindow.h"
 
@@ -393,7 +398,9 @@ void cMainWindow::onConvert()
 	if(exportDialog.exec() == QDialog::Rejected)
 		return;
 
+	m_working	= true;
 	doExport();
+	m_working	= false;
 }
 
 void cMainWindow::onThumbnailSize(int size)
@@ -405,7 +412,7 @@ void cMainWindow::onThumbnailSize(int size)
 void cMainWindow::doExport()
 {
 	EXPORTSETTINGS	exportSettings;
-	bool			overwriteAll	= false;
+	OVERWRITE		overwrite	= OVERWRITE_ASK;
 
 	getExportSettings(exportSettings);
 
@@ -423,7 +430,7 @@ void cMainWindow::doExport()
 		if(!lpExif)
 			continue;
 
-		overwriteAll	= exportFile(exportSettings, lpExif, overwriteAll);
+		overwrite	= exportFile(exportSettings, lpExif, overwrite);
 
 		m_lpProgressBar->setValue(i);
 		qApp->processEvents();
@@ -482,7 +489,7 @@ void cMainWindow::getExportSettings(EXPORTSETTINGS& exportSettings)
 	exportSettings.quality				= settings.value("export/quality", QVariant::fromValue(50)).toInt();
 }
 
-bool cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* lpExif, bool overwriteAll)
+OVERWRITE cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* lpExif, OVERWRITE overwrite)
 {
 	QString		destPath;
 	QString		destFile;
@@ -528,17 +535,22 @@ bool cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* lpExif
 	destFile.prepend(destPath + "/");
 	QFileInfo	destInfo(destFile);
 
-	if(destInfo.exists() && !overwriteAll)
+	if(destInfo.exists() && overwrite != OVERWRITE_ALL)
 	{
 		switch(exportSettings.fileOverwrite)
 		{
 		case FILE_OVERWRITE_ASK:
 			{
-				QMessageBox::StandardButton	ret	= QMessageBox::question(this, tr("File Exists"), QString(tr("File %1 exists. Do you want to overwrite?")).arg(destFile), QMessageBox::Yes | QMessageBox::No | QMessageBox::YesAll);
+				QMessageBox::StandardButton	ret	= QMessageBox::question(this, tr("File Exists"), QString(tr("File %1 exists. Do you want to overwrite?")).arg(destFile), QMessageBox::Yes | QMessageBox::No | QMessageBox::YesAll | QMessageBox::NoAll);
 				if(ret == QMessageBox::YesAll)
-					overwriteAll	= true;
+					overwrite	= OVERWRITE_ALL;
+				else if(ret == QMessageBox::NoAll)
+				{
+					overwrite	= OVERWRITE_NONE;
+					return(overwrite);
+				}
 				else if(ret == QMessageBox::No)
-					return(overwriteAll);
+					return(overwrite);
 			}
 			break;
 		case FILE_OVERWRITE_RENAME:
@@ -546,13 +558,15 @@ bool cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* lpExif
 			if(destFile.isEmpty())
 			{
 				QMessageBox::information(this, tr("File Export"), QString("%1 cannot be renamed.").arg(lpExif->fileName()));
-				return(overwriteAll);
+				return(overwrite);
 			}
 			break;
 		case FILE_OVERWRITE_OVERWRITE:
 			break;
 		}
 	}
+	else if(overwrite == OVERWRITE_NONE)
+		return(overwrite);
 
 	ui->m_lpStatusBar->showMessage(QString(tr("loading %1...")).arg(lpExif->fileName()));
 	qApp->processEvents();
@@ -577,7 +591,7 @@ bool cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* lpExif
 		}
 	}
 
-	return(overwriteAll);
+	return(overwrite);
 }
 
 QString cMainWindow::replaceTags(const QString& path, cEXIF* lpExif, const QString& extension, bool directory)

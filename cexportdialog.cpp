@@ -1,3 +1,8 @@
+/*!
+ \file cexportdialog.cpp
+
+*/
+
 #include "cexportdialog.h"
 #include "ui_cexportdialog.h"
 
