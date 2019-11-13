@@ -361,7 +361,7 @@ void cMainWindow::addFile(const QString& file)
 		return;
 
 	QFileInfo	info(file);
-	cEXIF*		lpExif	= new cEXIF;
+	cEXIF*		lpExif	= new cEXIF(&m_exifTAGList, &m_exifCompressionList, &m_exifLightSourceList, &m_exifFlashList, &m_iptcTagList, &m_xmpTagList);
 
 	if(!lpExif->fromFile(file))
 	{
@@ -577,6 +577,7 @@ void cMainWindow::getExportSettings(EXPORTSETTINGS& exportSettings)
 		addToExportLog(m_exportLog, "Existing File Overwrite Mode: <span class='option'>FILE_OVERWRITE_ASK</span>");
 	}
 
+	exportSettings.copyEXIF				= settings.value("export/copyEXIF", QVariant::fromValue(true)).toBool();
 	exportSettings.fileFormat			= settings.value("export/fileFormat").toString();
 	exportSettings.quality				= settings.value("export/quality", QVariant::fromValue(50)).toInt();
 
@@ -726,7 +727,17 @@ OVERWRITE cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* l
 			addToExportLog(m_exportLog, "Writing file: <span class='option'>" + destFile + "</span>");
 			writer.setQuality(exportSettings.quality);
 			if(writer.write(image))
+			{
 				addToExportLog(m_exportLog, "Writing file: <span class='optionok'>successful</span>");
+
+				if(exportSettings.copyEXIF)
+				{
+					if(lpExif->copyTo(destFile))
+						addToExportLog(m_exportLog, "Copy EXIF: <span class='optionok'>successful</span>");
+					else
+						addToExportLog(m_exportLog, "Copy EXIF: <span class='optionnok'>error</span>");
+				}
+			}
 			else
 				addToExportLog(m_exportLog, "Writing file: <span class='optionnok'>error: " + writer.errorString() + "</span>");
 		}

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>554</width>
-    <height>466</height>
+    <height>489</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -94,16 +94,6 @@
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="7" column="0" colspan="3">
-           <widget class="QRadioButton" name="m_lpFileOverwrite">
-            <property name="text">
-             <string>overwrite existing file</string>
-            </property>
-            <attribute name="buttonGroup">
-             <string notr="true">m_lpFileOverwriteMethod</string>
-            </attribute>
-           </widget>
-          </item>
           <item row="2" column="1">
            <widget class="QRadioButton" name="m_lpFilenameTag">
             <property name="text">
@@ -114,13 +104,33 @@
             </attribute>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QRadioButton" name="m_lpFilenamePlusConverted">
+          <item row="1" column="0">
+           <widget class="QRadioButton" name="m_lpNewFilename">
             <property name="text">
-             <string>old filename + _converted</string>
+             <string>rename</string>
             </property>
             <attribute name="buttonGroup">
-             <string notr="true">m_lpFilenameAdd</string>
+             <string notr="true">m_lpFilenameMethod</string>
+            </attribute>
+           </widget>
+          </item>
+          <item row="7" column="0" colspan="3">
+           <widget class="QRadioButton" name="m_lpFileOverwrite">
+            <property name="text">
+             <string>overwrite existing file</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">m_lpFileOverwriteMethod</string>
+            </attribute>
+           </widget>
+          </item>
+          <item row="6" column="0" colspan="3">
+           <widget class="QRadioButton" name="m_lpFileRename">
+            <property name="text">
+             <string>auto rename existing file</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">m_lpFileOverwriteMethod</string>
             </attribute>
            </widget>
           </item>
@@ -134,16 +144,13 @@
             </attribute>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QLineEdit" name="m_lpFileTag"/>
-          </item>
-          <item row="6" column="0" colspan="3">
-           <widget class="QRadioButton" name="m_lpFileRename">
+          <item row="1" column="1">
+           <widget class="QRadioButton" name="m_lpFilenamePlusConverted">
             <property name="text">
-             <string>auto rename existing file</string>
+             <string>old filename + _converted</string>
             </property>
             <attribute name="buttonGroup">
-             <string notr="true">m_lpFileOverwriteMethod</string>
+             <string notr="true">m_lpFilenameAdd</string>
             </attribute>
            </widget>
           </item>
@@ -157,6 +164,9 @@
             </attribute>
            </widget>
           </item>
+          <item row="2" column="2">
+           <widget class="QLineEdit" name="m_lpFileTag"/>
+          </item>
           <item row="3" column="2">
            <widget class="QLabel" name="m_lpFileTagHelp">
             <property name="text">
@@ -164,14 +174,11 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QRadioButton" name="m_lpNewFilename">
+          <item row="8" column="0" colspan="3">
+           <widget class="QCheckBox" name="m_lpCopyEXIF">
             <property name="text">
-             <string>rename</string>
+             <string>copy EXIF data</string>
             </property>
-            <attribute name="buttonGroup">
-             <string notr="true">m_lpFilenameMethod</string>
-            </attribute>
            </widget>
           </item>
          </layout>
@@ -289,9 +296,9 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="m_lpDirectoryMethod"/>
-  <buttongroup name="m_lpFilenameAdd"/>
   <buttongroup name="m_lpFileOverwriteMethod"/>
+  <buttongroup name="m_lpFilenameAdd"/>
+  <buttongroup name="m_lpDirectoryMethod"/>
   <buttongroup name="m_lpFilenameMethod"/>
  </buttongroups>
 </ui>

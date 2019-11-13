@@ -77,6 +77,7 @@ void cExportDialog::saveSettings()
 	else
 		settings.setValue("export/overwrite", QVariant::fromValue(QString("ask")));
 
+	settings.setValue("export/copyEXIF", QVariant::fromValue(ui->m_lpCopyEXIF->isChecked()));
 	settings.setValue("export/fileFormat", QVariant::fromValue(ui->m_lpFileFormat->currentText()));
 	settings.setValue("export/quality", QVariant::fromValue(ui->m_lpQuality->value()));
 }
@@ -200,6 +201,7 @@ void cExportDialog::initUI(const QList<IMAGEFORMAT>& imageFormats)
 			ui->m_lpFileFormat->addItem(i.description + " (" + i.extension + ")");
 	}
 	ui->m_lpFileFormat->setCurrentText(settings.value("export/fileFormat").toString());
+	(ui->m_lpCopyEXIF->setChecked(settings.value("export/copyEXIF", QVariant::fromValue(true)).toBool()));
 	ui->m_lpQuality->setValue(settings.value("export/quality", QVariant::fromValue(50)).toInt());
 	ui->m_lpQualityValue->setText(QString::number(ui->m_lpQuality->value()));
 

@@ -82,6 +82,7 @@ RESOURCES += \
 
 DISTFILES += \
     Doxyfile \
+    EFIFTags.xlsx \
     README.md \
     LICENSE \
     fileFormats.xlsx \

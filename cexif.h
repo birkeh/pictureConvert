@@ -188,12 +188,13 @@ public:
 class cEXIFTag
 {
 public:
-	cEXIFTag(const qint32& iTAGID, const QString& szTAGName, const qint32& iIFDID, const qint32& iTypeID, const QString& szDescription);
+	cEXIFTag(const qint32& iTAGID, const QString& szTAGName, const QString& szIFD, const QString& szKey, const QString& szType, const QString& szDescription);
 
 	qint32		m_iTAGID;					/*!< TODO: describe */
 	QString		m_szTAGName;				/*!< TODO: describe */
-	qint32		m_iIFDID;					/*!< TODO: describe */
-	qint32		m_iTypeID;					/*!< TODO: describe */
+	QString		m_szIFD;					/*!< TODO: describe */
+	QString		m_szKey;					/*!< TODO: describe */
+	QString		m_szType;					/*!< TODO: describe */
 	QString		m_szDescription;			/*!< TODO: describe */
 };
 
@@ -215,21 +216,38 @@ public:
 	 \fn add
 	 \param iTAGID
 	 \param szTAGName
-	 \param iIFDID
-	 \param iTypeID
+	 \param szIFD
+	 \param szType
 	 \param szDescription
 	 \return cEXIFTag
 	*/
-	cEXIFTag*		add(const qint32& iTAGID, const QString& szTAGName, const qint32& iIFDID, const qint32& iTypeID, const QString& szDescription);
+	cEXIFTag*		add(const qint32& iTAGID, const QString& szTAGName, const QString& szIFD, const QString& szKey, const QString& szType, const QString& szDescription);
+	/*!
+	 \brief
+
+	 \fn find
+	 \param szKey
+	 \return cEXIFTag
+	*/
+	cEXIFTag*		find(const QString& szKey);
 	/*!
 	 \brief
 
 	 \fn find
 	 \param iTAGID
-	 \param iIFDID
+	 \param szIFD
 	 \return cEXIFTag
 	*/
-	cEXIFTag*		find(const qint32& iTAGID, const qint32& iIFDID);
+	cEXIFTag*		find(const qint32& iTAGID, const QString& szIFD);
+	/*!
+	 \brief
+
+	 \fn find
+	 \param szTAG
+	 \param szIFD
+	 \return cEXIFTag
+	*/
+	cEXIFTag*		find(const QString& szTAG, const QString& szIFD);
 };
 
 /*!
@@ -589,7 +607,7 @@ public:
 class cEXIF
 {
 public:
-	cEXIF();
+	cEXIF(cEXIFTagList* lpEXIFTagList, cEXIFCompressionList* lpEXIFCompressionList, cEXIFLightSourceList* lpEXIFLightSourceList, cEXIFFlashList* lpEXIFFlashList, cIPTCTagList* lpIPTCTagList, cXMPTagList* lpXMPTagList);
 
 	/*!
 	 \brief
@@ -783,6 +801,14 @@ public:
 	*/
 	QImage					thumbnail();
 
+	/*!
+	 \brief
+
+	 \fn copyTo
+	 \param fileName
+	*/
+	bool copyTo(const QString& fileName);
+
 private:
 	cEXIFValueList			m_exifValueList;				/*!< TODO: describe */
 	cIPTCValueList			m_iptcValueList;				/*!< TODO: describe */
@@ -794,24 +820,24 @@ private:
 	QList<QImage>			m_previewList;					/*!< TODO: describe */
 	QImage					m_thumbnail;					/*!< TODO: describe */
 
-	cEXIFCompressionList	m_exifCompressionList;			/*!< TODO: describe */
-	cEXIFLightSourceList	m_exifLightSourceList;			/*!< TODO: describe */
-	cEXIFFlashList			m_exifFlashList;				/*!< TODO: describe */
-	cEXIFTagList			m_exifTagList;					/*!< TODO: describe */
+	cEXIFTagList*			m_lpEXIFTagList;				/*!< TODO: describe */
+	cEXIFCompressionList*	m_lpEXIFCompressionList;		/*!< TODO: describe */
+	cEXIFLightSourceList*	m_lpEXIFLightSourceList;		/*!< TODO: describe */
+	cEXIFFlashList*			m_lpEXIFFlashList;				/*!< TODO: describe */
 
-	cIPTCTagList			m_iptcTagList;					/*!< TODO: describe */
+	cIPTCTagList*			m_lpIPTCTagList;				/*!< TODO: describe */
 
-	cXMPTagList				m_xmpTagList;					/*!< TODO: describe */
+	cXMPTagList*			m_lpXMPTagList;					/*!< TODO: describe */
 
 	/*!
 	 \brief
 
 	 \fn getEXIFTag
 	 \param iTAGID
-	 \param iIFDID
+	 \param szIFD
 	 \return QVariant
 	*/
-	QVariant				getEXIFTag(qint32 iTAGID, qint32 iIFDID);
+	QVariant				getEXIFTag(qint32 iTAGID, const QString& szIFD);
 	/*!
 	 \brief
 
@@ -836,7 +862,7 @@ private:
 	 \param iIFDID
 	 \return QList<QVariant>
 	*/
-	QList<QVariant>			getTagList(qint32 iTAGID, qint32 iIFDID);
+	QList<QVariant>			getTagList(qint32 iTAGID, const QString& szIFD);
 };
 
 Q_DECLARE_METATYPE(cEXIF*)

@@ -86,6 +86,7 @@ typedef struct tagEXPORTSETTINGS
 	FILE_ADD			fileAdd;				/*!< TODO: describe */
 	QString				fileTag;				/*!< TODO: describe */
 	FILE_OVERWRITE		fileOverwrite;			/*!< TODO: describe */
+	bool				copyEXIF;				/*!< TODO: describe */
 	QString				fileFormat;				/*!< TODO: describe */
 	int					quality;				/*!< TODO: describe */
 /*!
@@ -136,6 +137,15 @@ private:
 	bool							m_working;					/*!< TODO: describe */
 
 	QString							m_exportLog;				/*!< TODO: describe */
+
+	cEXIFTagList					m_exifTAGList;				/*!< TODO: describe */
+	cEXIFCompressionList			m_exifCompressionList;		/*!< TODO: describe */
+	cEXIFLightSourceList			m_exifLightSourceList;		/*!< TODO: describe */
+	cEXIFFlashList					m_exifFlashList;			/*!< TODO: describe */
+
+	cIPTCTagList					m_iptcTagList;				/*!< TODO: describe */
+
+	cXMPTagList						m_xmpTagList;				/*!< TODO: describe */
 
 	/*!
 	 \brief
