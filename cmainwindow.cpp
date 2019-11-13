@@ -689,27 +689,27 @@ OVERWRITE cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* l
 	cImage			image(lpExif->fileName());
 	if(!image.isNull())
 	{
-		QTransform	rotation;
-		int			angle	= 0;
+//		QTransform	rotation;
+//		int			angle	= 0;
 
-		switch(lpExif->imageOrientation())
-		{
-		case 8:
-			angle	= 270;
-			break;
-		case 3:
-			angle	= 180;
-			break;
-		case 6:
-			angle	=  90;
-			break;
-		}
+//		switch(lpExif->imageOrientation())
+//		{
+//		case 8:
+//			angle	= 270;
+//			break;
+//		case 3:
+//			angle	= 180;
+//			break;
+//		case 6:
+//			angle	=  90;
+//			break;
+//		}
 
-		if(angle != 0)
-		{
-			rotation.rotate(angle);
-			image	= image.transformed(rotation);
-		}
+//		if(angle != 0)
+//		{
+//			rotation.rotate(angle);
+//			image	= image.transformed(rotation);
+//		}
 
 		addToExportLog(m_exportLog, "Loading file: <span class='optionok'>successful</span>");
 
