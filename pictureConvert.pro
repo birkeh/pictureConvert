@@ -85,6 +85,7 @@ DISTFILES += \
     EFIFTags.xlsx \
     README.md \
     LICENSE \
+    exifTags.db \
     fileFormats.xlsx \
     installer.iss \
     qdarkstyle/rc/branch_closed-on.png \
