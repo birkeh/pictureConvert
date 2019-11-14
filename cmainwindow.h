@@ -18,6 +18,8 @@
 #include <QMimeDatabase>
 
 #include <QProgressBar>
+#include <QToolBar>
+#include <QAction>
 
 
 QT_BEGIN_NAMESPACE
@@ -131,10 +133,23 @@ private:
 	QStandardItemModel*				m_lpFileListModel;			/*!< TODO: describe */
 	QProgressBar*					m_lpProgressBar;			/*!< TODO: describe */
 
+	QToolBar*						m_lpFileToolBar;			/*!< TODO: describe */
+	QAction*						m_lpOpenFileAction;			/*!< TODO: describe */
+	QAction*						m_lpOpenDirectoryAction;	/*!< TODO: describe */
+
+	QToolBar*						m_lpListToolBar;			/*!< TODO: describe */
+	QAction*						m_lpDeleteAction;			/*!< TODO: describe */
+	QAction*						m_lpClearAction;			/*!< TODO: describe */
+
+	QToolBar*						m_lpActionToolBar;			/*!< TODO: describe */
+	QAction*						m_lpConvertAction;			/*!< TODO: describe */
+	QAction*						m_lpStopAction;				/*!< TODO: describe */
+
 	QMimeDatabase					m_mimeDB;					/*!< TODO: describe */
 	QList<IMAGEFORMAT>				m_imageFormats;				/*!< TODO: describe */
 
 	bool							m_working;					/*!< TODO: describe */
+	bool							m_stopIt;					/*!< TODO: describe */
 
 	QString							m_exportLog;				/*!< TODO: describe */
 
@@ -265,6 +280,19 @@ private:
 	*/
 	void							countImages();
 
+	/*!
+	 \brief
+
+	 \fn setActionEnabled
+	 \param openFileAction
+	 \param openDirectoryAction
+	 \param deleteAction
+	 \param clearAction
+	 \param convertAction
+	 \param stopAction
+	*/
+	void							setActionEnabled(bool openFileAction, bool openDirectoryAction, bool deleteAction, bool clearAction, bool convertAction, bool stopAction);
+
 private slots:
 	/*!
 	 \brief
@@ -296,6 +324,12 @@ private slots:
 	 \fn onConvert
 	*/
 	void							onConvert();
+	/*!
+	 \brief
+
+	 \fn onStop
+	*/
+	void							onStop();
 
 	/*!
 	 \brief

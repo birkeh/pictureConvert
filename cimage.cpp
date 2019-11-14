@@ -18,56 +18,64 @@
 cImage::cImage() :
 	QImage(),
 	m_isChromatic(true),
-	m_camType(camera_unknown)
+	m_camType(camera_unknown),
+	m_raw(false)
 {
 }
 
 cImage::cImage(const QSize &size, QImage::Format format) :
 	QImage(size, format),
 	m_isChromatic(true),
-	m_camType(camera_unknown)
+	m_camType(camera_unknown),
+	m_raw(false)
 {
 }
 
 cImage::cImage(int width, int height, QImage::Format format) :
 	QImage(width, height, format),
 	m_isChromatic(true),
-	m_camType(camera_unknown)
+	m_camType(camera_unknown),
+	m_raw(false)
 {
 }
 
 cImage::cImage(uchar *data, int width, int height, QImage::Format format, QImageCleanupFunction cleanupFunction, void *cleanupInfo) :
 	QImage(data, width, height, format, cleanupFunction, cleanupInfo),
 	m_isChromatic(true),
-	m_camType(camera_unknown)
+	m_camType(camera_unknown),
+	m_raw(false)
 {
 }
 
 cImage::cImage(const uchar *data, int width, int height, QImage::Format format, QImageCleanupFunction cleanupFunction, void *cleanupInfo) :
 	QImage(data, width, height, format, cleanupFunction, cleanupInfo),
 	m_isChromatic(true),
-	m_camType(camera_unknown)
+	m_camType(camera_unknown),
+	m_raw(false)
 {
 }
 
 cImage::cImage(uchar *data, int width, int height, int bytesPerLine, QImage::Format format, QImageCleanupFunction cleanupFunction, void *cleanupInfo) :
 	QImage(data, width, height, bytesPerLine, format, cleanupFunction, cleanupInfo),
 	m_isChromatic(true),
-	m_camType(camera_unknown)
+	m_camType(camera_unknown),
+	m_raw(false)
 {
 }
 
 cImage::cImage(const uchar *data, int width, int height, int bytesPerLine, QImage::Format format, QImageCleanupFunction cleanupFunction, void *cleanupInfo) :
 	QImage(data, width, height, bytesPerLine, format, cleanupFunction, cleanupInfo),
 	m_isChromatic(true),
-	m_camType(camera_unknown)
+	m_camType(camera_unknown),
+	m_raw(false)
 {
 }
 
 cImage::cImage(const QString &fileName, const char *format) :
 	QImage(),
 	m_isChromatic(true),
-	m_camType(camera_unknown)
+	m_camType(camera_unknown),
+	m_raw(false)
 {
 	load(fileName, format);
 }
@@ -75,14 +83,16 @@ cImage::cImage(const QString &fileName, const char *format) :
 cImage::cImage(const QImage &image) :
 	QImage(image),
 	m_isChromatic(true),
-	m_camType(camera_unknown)
+	m_camType(camera_unknown),
+	m_raw(false)
 {
 }
 
 cImage::cImage(QImage &&other) :
 	QImage(other),
 	m_isChromatic(true),
-	m_camType(camera_unknown)
+	m_camType(camera_unknown),
+	m_raw(false)
 {
 }
 
@@ -407,5 +417,12 @@ bool cImage::loadRAW(const QString &fileName)
 	iProcessor.recycle();
 	rawMat.release();
 
+	m_raw	= true;
+
 	return(true);
+}
+
+bool cImage::isRaw()
+{
+	return(m_raw);
 }

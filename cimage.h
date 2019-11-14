@@ -122,6 +122,14 @@ public:
 	*/
 	bool	load(const QString &fileName, const char *format = nullptr);
 
+	/*!
+	 \brief
+
+	 \fn isRaw
+	 \return bool
+	*/
+	bool	isRaw();
+
 protected:
 	/*!
 	 \brief
@@ -205,6 +213,7 @@ protected:
 private:
 	bool	m_isChromatic;		/*!< TODO: describe */
 	Cam		m_camType;			/*!< TODO: describe */
+	bool	m_raw;				/*!< TODO: describe */
 
 	/*!
 	 \brief

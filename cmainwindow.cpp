@@ -36,7 +36,17 @@ cMainWindow::cMainWindow(cSplashScreen* lpSplashScreen, QWidget *parent) :
 	ui(new Ui::cMainWindow),
 	m_lpSplashScreen(lpSplashScreen),
 	m_lpProgressBar(nullptr),
-	m_working(false)
+	m_lpFileToolBar(nullptr),
+	m_lpOpenFileAction(nullptr),
+	m_lpOpenDirectoryAction(nullptr),
+	m_lpListToolBar(nullptr),
+	m_lpDeleteAction(nullptr),
+	m_lpClearAction(nullptr),
+	m_lpActionToolBar(nullptr),
+	m_lpConvertAction(nullptr),
+	m_lpStopAction(nullptr),
+	m_working(false),
+	m_stopIt(false)
 {
 	initUI();
 	createActions();
@@ -44,6 +54,7 @@ cMainWindow::cMainWindow(cSplashScreen* lpSplashScreen, QWidget *parent) :
 	setImageFormats();
 
 	countImages();
+	m_lpStopAction->setEnabled(false);
 }
 
 cMainWindow::~cMainWindow()
@@ -117,16 +128,7 @@ void cMainWindow::createActions()
 	createFileActions();
 	createContextActions();
 
-	connect(ui->m_lpAddFile,		&QPushButton::clicked,		this,		&cMainWindow::onAddFile);
-	connect(ui->m_lpAddFolder,		&QPushButton::clicked,		this,		&cMainWindow::onAddFolder);
-	connect(ui->m_lpRemoveSelected,	&QPushButton::clicked,		this,		&cMainWindow::onRemoveSelected);
-	connect(ui->m_lpClearList,		&QPushButton::clicked,		this,		&cMainWindow::onClearList);
 	connect(ui->m_lpFileList,		&cTreeView::deleteEntrys,	this,		&cMainWindow::onDeleteEntrys);
-
-	connect(ui->m_lpConvert,		&QPushButton::clicked,		this,		&cMainWindow::onConvert);
-
-	connect(ui->m_lpFileList,		&cTreeView::addEntrys,		this,		&cMainWindow::onAddEntrys);
-
 	connect(ui->m_lpThumbnailSize,	&QSlider::valueChanged,		this,		&cMainWindow::onThumbnailSize);
 }
 
@@ -136,6 +138,34 @@ void cMainWindow::createContextActions()
 
 void cMainWindow::createFileActions()
 {
+	m_lpFileToolBar	= addToolBar("file");
+
+	const QIcon	openIcon			= QIcon::fromTheme("document-open");
+	m_lpOpenFileAction				= m_lpFileToolBar->addAction(openIcon, tr("&Open..."), this, &cMainWindow::onAddFile);
+	m_lpOpenFileAction->setShortcut(QKeySequence::Open);
+
+	const QIcon	openDirectoryIcon	= QIcon::fromTheme("folder");
+	m_lpOpenDirectoryAction			= m_lpFileToolBar->addAction(openIcon, tr("&Open Folder..."), this, &cMainWindow::onAddFolder);
+
+
+	m_lpListToolBar	= addToolBar("list");
+
+	const QIcon	deleteIcon			= QIcon::fromTheme("edit-delete");
+	m_lpDeleteAction				= m_lpListToolBar->addAction(deleteIcon, tr("&Delete"), this, &cMainWindow::onDeleteEntrys);
+	m_lpDeleteAction->setShortcut(QKeySequence::Delete);
+
+	const QIcon	clearIcon			= QIcon::fromTheme("edit-clear");
+	m_lpClearAction					= m_lpListToolBar->addAction(clearIcon, tr("&Clear"), this, &cMainWindow::onClearList);
+
+
+	m_lpActionToolBar	= addToolBar("action");
+
+	const QIcon	convertIcon			= QIcon::fromTheme("system-run");
+	m_lpConvertAction				= m_lpActionToolBar->addAction(convertIcon, tr("&Convert"), this, &cMainWindow::onConvert);
+	m_lpConvertAction->setShortcut(QKeySequence::Delete);
+
+	const QIcon	stopIcon			= QIcon::fromTheme("process-stop");
+	m_lpStopAction					= m_lpActionToolBar->addAction(stopIcon, tr("&Stop"), this, &cMainWindow::onStop);
 }
 
 void cMainWindow::setImageFormats()
@@ -266,6 +296,8 @@ void cMainWindow::onAddFolder()
 	settings.setValue("import/recursive", QVariant::fromValue(checked));
 
 	m_working	= true;
+	m_stopIt	= false;
+	setActionEnabled(false, false, false, false, false, true);
 	ui->m_lpStatusBar->showMessage(tr("importing..."));
 	qApp->processEvents();
 
@@ -275,6 +307,7 @@ void cMainWindow::onAddFolder()
 		ui->m_lpFileList->resizeColumnToContents(i);
 
 	ui->m_lpStatusBar->showMessage(tr("done."), 3000);
+	setActionEnabled(true, true, true, true, true, false);
 	m_working	= false;
 
 	countImages();
@@ -304,6 +337,9 @@ void cMainWindow::onClearList()
 void cMainWindow::onAddEntrys(const QStringList& fileList)
 {
 	m_working	= true;
+	m_stopIt	= false;
+	setActionEnabled(false, false, false, false, false, true);
+
 	ui->m_lpStatusBar->showMessage(tr("importing..."));
 	qApp->processEvents();
 
@@ -322,12 +358,15 @@ void cMainWindow::onAddEntrys(const QStringList& fileList)
 			if(mimeType.name().startsWith("image"))
 				addFile(file);
 		}
+		if(m_stopIt)
+			break;
 	}
 
 	for(int i = 0;i < m_lpFileListModel->columnCount();i++)
 		ui->m_lpFileList->resizeColumnToContents(i);
 
 	ui->m_lpStatusBar->showMessage(tr("done."), 3000);
+	setActionEnabled(true, true, true, true, true, false);
 	m_working	= false;
 
 	countImages();
@@ -345,11 +384,19 @@ void cMainWindow::addPath(const QString& path, bool recursive)
 	if(recursive)
 	{
 		for(int i = 0;i < dirList.count();i++)
+		{
 			addPath(path + "/" + dirList[i], recursive);
+			if(m_stopIt)
+				break;
+		}
 	}
 
 	for(int i = 0;i < fileList.count();i++)
+	{
 		addFile(path + "/" + fileList[i]);
+		if(m_stopIt)
+			break;
+	}
 }
 
 void cMainWindow::addFile(const QString& file)
@@ -398,7 +445,6 @@ void cMainWindow::addFile(const QString& file)
 
 	m_lpFileListModel->appendRow(items);
 
-	countImages();
 	qApp->processEvents();
 }
 
@@ -421,8 +467,16 @@ void cMainWindow::onConvert()
 		return;
 
 	m_working	= true;
+	m_stopIt	= false;
+	setActionEnabled(false, false, false, false, false, true);
 	doExport();
+	setActionEnabled(true, true, true, true, true, false);
 	m_working	= false;
+}
+
+void cMainWindow::onStop()
+{
+	m_stopIt	= true;
 }
 
 void cMainWindow::onThumbnailSize(int size)
@@ -481,7 +535,14 @@ void cMainWindow::doExport()
 		overwrite	= exportFile(exportSettings, lpExif, overwrite);
 
 		m_lpProgressBar->setValue(i+1);
+
 		qApp->processEvents();
+
+		if(m_stopIt)
+		{
+			addToExportLog(m_exportLog, "<b>aborted.</b>");
+			break;
+		}
 	}
 
 	m_lpProgressBar->setVisible(false);
@@ -689,27 +750,30 @@ OVERWRITE cMainWindow::exportFile(const EXPORTSETTINGS& exportSettings, cEXIF* l
 	cImage			image(lpExif->fileName());
 	if(!image.isNull())
 	{
-//		QTransform	rotation;
-//		int			angle	= 0;
+		if(!image.isRaw())
+		{
+			QTransform	rotation;
+			int			angle	= 0;
 
-//		switch(lpExif->imageOrientation())
-//		{
-//		case 8:
-//			angle	= 270;
-//			break;
-//		case 3:
-//			angle	= 180;
-//			break;
-//		case 6:
-//			angle	=  90;
-//			break;
-//		}
+			switch(lpExif->imageOrientation())
+			{
+			case 8:
+				angle	= 270;
+				break;
+			case 3:
+				angle	= 180;
+				break;
+			case 6:
+				angle	=  90;
+				break;
+			}
 
-//		if(angle != 0)
-//		{
-//			rotation.rotate(angle);
-//			image	= image.transformed(rotation);
-//		}
+			if(angle != 0)
+			{
+				rotation.rotate(angle);
+				image	= image.transformed(rotation);
+			}
+		}
 
 		addToExportLog(m_exportLog, "Loading file: <span class='optionok'>successful</span>");
 
@@ -823,7 +887,17 @@ void cMainWindow::countImages()
 	ui->m_lpStatusBar->showMessage(QString("%1 image(s)").arg(count));
 
 	if(count)
-		ui->m_lpConvert->setEnabled(true);
+		m_lpConvertAction->setEnabled(true);
 	else
-		ui->m_lpConvert->setEnabled(false);
+		m_lpConvertAction->setEnabled(false);
+}
+
+void cMainWindow::setActionEnabled(bool openFileAction, bool openDirectoryAction, bool deleteAction, bool clearAction, bool convertAction, bool stopAction)
+{
+	m_lpOpenFileAction->setEnabled(openFileAction);
+	m_lpOpenDirectoryAction->setEnabled(openDirectoryAction);
+	m_lpDeleteAction->setEnabled(deleteAction);
+	m_lpClearAction->setEnabled(clearAction);
+	m_lpConvertAction->setEnabled(convertAction);
+	m_lpStopAction->setEnabled(stopAction);
 }
