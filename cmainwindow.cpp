@@ -30,6 +30,9 @@
 
 #include <QMessageBox>
 
+#include <QSqlDatabase>
+#include <QSqlQuery>
+
 
 cMainWindow::cMainWindow(cSplashScreen* lpSplashScreen, QWidget *parent) :
 	QMainWindow(parent),
@@ -173,57 +176,32 @@ void cMainWindow::setImageFormats()
 	QList<QByteArray>	readList	= QImageReader::supportedImageFormats();
 	QList<QByteArray>	writeList	= QImageWriter::supportedImageFormats();
 
-	addImageFormat("bmp", "Windows Bitmap", "*.bmp", readList, writeList);
-	addImageFormat("gif", "Graphic Interchange Format (optional)", "*.gif", readList, writeList);
-	addImageFormat("jpg", "Joint Photographic Experts Group", "*.jpg", readList, writeList);
-	addImageFormat("png", "Portable Network Graphics", "*.png", readList, writeList);
-	addImageFormat("pbm", "Portable Bitmap", "*.pbm", readList, writeList);
-	addImageFormat("pgm", "Portable Graymap", "*.pgm", readList, writeList);
-	addImageFormat("ppm", "Portable Pixmap", "*.ppm", readList, writeList);
-	addImageFormat("xbm", "X11 Bitmap", "*.xbm", readList, writeList);
-	addImageFormat("xpm", "X11 Pixmap", "*.xpm", readList, writeList);
-	addImageFormat("svg", "Scalable Vector Graphics", "*.svg", readList, writeList);
-	addImageFormat("icns", "Apple Icon Image", "*.icns", readList, writeList);
-	addImageFormat("jp2", "Joint Photographic Experts Group 2000", "*.jp2", readList, writeList);
-	addImageFormat("mng", "Multiple-image Network Graphics", "*.mng", readList, writeList);
-	addImageFormat("tga", "Truevision Graphics Adapter", "*.tga", readList, writeList);
-	addImageFormat("tiff", "Tagged Image File Format", "*.tiff", readList, writeList);
-	addImageFormat("wbmp", "Wireless Bitmap", "*.wbmp", readList, writeList);
-	addImageFormat("webp", "WebP", "*.webp", readList, writeList);
-	addImageFormat("", "Hasselblad", "*.3fr", readList, writeList);
-	addImageFormat("", "Arri_Alexa", "*.ari", readList, writeList);
-	addImageFormat("", "Sony", "*.arw *.srf *.sr2", readList, writeList);
-	addImageFormat("", "Casio", "*.bay", readList, writeList);
-	addImageFormat("", "Blackmagic Design", "*.braw", readList, writeList);
-	addImageFormat("", "Cintel", "*.cri", readList, writeList);
-	addImageFormat("", "Canon", "*.crw *.cr2 *.cr3", readList, writeList);
-	addImageFormat("", "Phase_One", "*.cap *.iiq *.eip", readList, writeList);
-	addImageFormat("", "Kodak", "*.dcs *.dcr *.drf *.k25 *.kdc", readList, writeList);
-	addImageFormat("", "Adobe", "*.dng", readList, writeList);
-	addImageFormat("", "Epson", "*.erf", readList, writeList);
-	addImageFormat("", "Imacon/Hasselblad raw", "*.fff", readList, writeList);
-	addImageFormat("", "GoPro", "*.gpr", readList, writeList);
-	addImageFormat("", "Mamiya", "*.mef", readList, writeList);
-	addImageFormat("", "Minolta, Agfa", "*.mdc", readList, writeList);
-	addImageFormat("", "Leaf", "*.mos", readList, writeList);
-	addImageFormat("", "Minolta, Konica Minolta", "*.mrw", readList, writeList);
-	addImageFormat("", "Nikon", "*.nef *.nrw", readList, writeList);
-	addImageFormat("", "Olympus", "*.orf", readList, writeList);
-	addImageFormat("", "Pentax", "*.pef *.ptx", readList, writeList);
-	addImageFormat("", "Logitech", "*.pxn", readList, writeList);
-	addImageFormat("", "RED Digital Cinema", "*.R3D", readList, writeList);
-	addImageFormat("", "Fuji", "*.raf", readList, writeList);
-	addImageFormat("", "Panasonic", "*.raw *.rw2", readList, writeList);
-	addImageFormat("", "Leica", "*.raw *.rwl *.dng", readList, writeList);
-	addImageFormat("", "Rawzor", "*.rwz", readList, writeList);
-	addImageFormat("", "Samsung", "*.srw", readList, writeList);
-	addImageFormat("", "Sigma", "*.x3f", readList, writeList);
+	QSqlDatabase	db	= QSqlDatabase::addDatabase("QSQLITE");
+	db.setHostName("localhost");
+	db.setDatabaseName("pictureConvert.db");
+
+	if(!db.open())
+		return;
+
+	QSqlQuery	query;
+
+	query.prepare("SELECT shortname, description, extension FROM imageFormat;");
+	if(!query.exec())
+	{
+		db.close();
+		return;
+	}
+
+	while(query.next())
+		addImageFormat(query.value("shortname").toString(), query.value("description").toString(), query.value("extension").toString(), readList, writeList);
+
+	db.close();
 }
 
-void cMainWindow::addImageFormat(const char* shortName, const char* description, const char* extension, QList<QByteArray>& readList, QList<QByteArray>& writeList)
+void cMainWindow::addImageFormat(const QString& shortName, const QString& description, const QString& extension, QList<QByteArray>& readList, QList<QByteArray>& writeList)
 {
-	bool	r	= readList.contains(QByteArray(shortName));
-	bool	w	= writeList.contains(QByteArray(shortName));
+	bool	r	= readList.contains(QByteArray(shortName.toUtf8()));
+	bool	w	= writeList.contains(QByteArray(shortName.toUtf8()));
 
 	if(QString(shortName).isEmpty())
 		r	= true;

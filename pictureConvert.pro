@@ -82,12 +82,12 @@ RESOURCES += \
 
 DISTFILES += \
     Doxyfile \
-    EFIFTags.xlsx \
     README.md \
     LICENSE \
-    exifTags.db \
     fileFormats.xlsx \
     installer.iss \
+    pictureConvert.db \
+    pictureConvert.xlsx \
     qdarkstyle/rc/branch_closed-on.png \
     qdarkstyle/rc/branch_closed.png \
     qdarkstyle/rc/branch_open-on.png \

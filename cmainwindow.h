@@ -271,7 +271,7 @@ private:
 	 \param readList
 	 \param writeList
 	*/
-	void							addImageFormat(const char* shortName, const char* description, const char* extension, QList<QByteArray>& readList, QList<QByteArray>& writeList);
+	void							addImageFormat(const QString& shortName, const QString& description, const QString& extension, QList<QByteArray>& readList, QList<QByteArray>& writeList);
 
 	/*!
 	 \brief

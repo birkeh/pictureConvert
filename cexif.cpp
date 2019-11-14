@@ -539,7 +539,7 @@ cEXIFCompressionList::cEXIFCompressionList()
 {
 	QSqlDatabase	db	= QSqlDatabase::addDatabase("QSQLITE");
 	db.setHostName("localhost");
-	db.setDatabaseName("exifTags.db");
+	db.setDatabaseName("pictureConvert.db");
 
 	if(!db.open())
 		return;
@@ -601,7 +601,7 @@ cEXIFLightSourceList::cEXIFLightSourceList()
 {
 	QSqlDatabase	db	= QSqlDatabase::addDatabase("QSQLITE");
 	db.setHostName("localhost");
-	db.setDatabaseName("exifTags.db");
+	db.setDatabaseName("pictureConvert.db");
 
 	if(!db.open())
 		return;
@@ -663,7 +663,7 @@ cEXIFFlashList::cEXIFFlashList()
 {
 	QSqlDatabase	db	= QSqlDatabase::addDatabase("QSQLITE");
 	db.setHostName("localhost");
-	db.setDatabaseName("exifTags.db");
+	db.setDatabaseName("pictureConvert.db");
 
 	if(!db.open())
 		return;
@@ -729,7 +729,7 @@ cEXIFTagList::cEXIFTagList()
 {
 	QSqlDatabase	db	= QSqlDatabase::addDatabase("QSQLITE");
 	db.setHostName("localhost");
-	db.setDatabaseName("exifTags.db");
+	db.setDatabaseName("pictureConvert.db");
 
 	if(!db.open())
 		return;
@@ -1039,7 +1039,7 @@ cXMPTagList::cXMPTagList()
 {
 	QSqlDatabase	db	= QSqlDatabase::addDatabase("QSQLITE");
 	db.setHostName("localhost");
-	db.setDatabaseName("exifTags.db");
+	db.setDatabaseName("pictureConvert.db");
 
 	if(!db.open())
 		return;
