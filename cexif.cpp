@@ -15,6 +15,8 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 
+#include "cimage.h"
+
 #include <exiv2/exiv2.hpp>
 
 
@@ -44,7 +46,8 @@ bool cEXIF::fromFile(const QString& szFileName)
 
 	try
 	{
-		Exiv2::Image::UniquePtr	image		= Exiv2::ImageFactory::open(szFileName.toLocal8Bit().toStdString());
+//		Exiv2::Image::UniquePtr	image		= Exiv2::ImageFactory::open(szFileName.toLocal8Bit().toStdString());
+		Exiv2::Image::AutoPtr	image		= Exiv2::ImageFactory::open(szFileName.toLocal8Bit().toStdString());
 		if(!image.get())
 			return(false);
 
@@ -154,7 +157,7 @@ bool cEXIF::fromFile(const QString& szFileName)
 
 	if(!m_previewList.count())
 	{
-		QImage	image;
+		cImage	image;
 		if(image.load(szFileName))
 		{
 			QTransform	rotation;
@@ -501,7 +504,8 @@ bool cEXIF::copyTo(const QString& fileName)
 {
 	try
 	{
-		Exiv2::Image::UniquePtr	image		= Exiv2::ImageFactory::open(fileName.toLocal8Bit().toStdString());
+//		Exiv2::Image::UniquePtr	image		= Exiv2::ImageFactory::open(fileName.toLocal8Bit().toStdString());
+		Exiv2::Image::AutoPtr	image		= Exiv2::ImageFactory::open(fileName.toLocal8Bit().toStdString());
 		if(!image.get())
 			return(false);
 

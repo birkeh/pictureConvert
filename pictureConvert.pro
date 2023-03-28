@@ -20,8 +20,8 @@ win32-msvc* {
 
 win32-g++ {
     message("mingw")
-    INCLUDEPATH += C:\dev\3rdParty\exiv2\include C:\dev\3rdParty\libraw C:\dev\3rdParty\libjpeg\include C:\dev\3rdParty\opencv\include dng
-    LIBS += -LC:\dev\3rdParty\exiv2\lib -lexiv2.dll -LC:\dev\3rdParty\libraw\lib -LC:\dev\3rdParty\opencv\x64\mingw\lib -lraw -lws2_32 -lz -lopencv_core412.dll -lopencv_imgproc412.dll
+    INCLUDEPATH += C:\dev\3rdParty\exiv2-0.27.5\include C:\dev\3rdParty\libraw C:\dev\3rdParty\libjpeg\include C:\dev\3rdParty\opencv\include dng
+    LIBS += -LC:\dev\3rdParty\exiv2-0.27.5\lib -lexiv2.dll -LC:\dev\3rdParty\libraw\lib -LC:\dev\3rdParty\opencv\x64\mingw\lib -lraw -lws2_32 -lz -lopencv_core412.dll -lopencv_imgproc412.dll
 }
 
 unix {

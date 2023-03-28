@@ -333,7 +333,7 @@ void cMainWindow::onAddEntrys(const QStringList& fileList)
 		{
 			QMimeType	mimeType	= m_mimeDB.mimeTypeForFile(file);
 
-			if(mimeType.name().startsWith("image"))
+			if(mimeType.name().startsWith("image") || !fileInfo.suffix().compare("cr3", Qt::CaseInsensitive))
 				addFile(file);
 		}
 		if(m_stopIt)
